@@ -15,6 +15,12 @@ const sizeClasses = {
   lg: 'w-20 h-20 text-xl',
 };
 
+const activeRingClasses = {
+  sm: 'border-green-400 ring-2 ring-green-400/50 scale-105',
+  md: 'border-green-400 ring-3 ring-green-400/50 scale-110',
+  lg: 'border-green-400 ring-4 ring-green-400/50 scale-110',
+};
+
 export function PlayerAvatar({
   name,
   profilePicture,
@@ -33,7 +39,7 @@ export function PlayerAvatar({
         className={`
           relative rounded-full overflow-hidden border-2 shadow-lg transition-all duration-300
           ${sizeClasses[size]}
-          ${isActive ? 'border-green-400 ring-4 ring-green-400/50 animate-pulse scale-110' : ''}
+          ${isActive ? `${activeRingClasses[size]} animate-pulse` : ''}
           ${!isActive && isMe ? 'border-gold-400 ring-2 ring-gold-400/40' : ''}
           ${!isActive && !isMe ? 'border-white/30' : ''}
           ${showReadyRing && isReady ? 'ring-2 ring-green-500/60' : ''}

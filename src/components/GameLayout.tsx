@@ -23,11 +23,19 @@ export function GameLayout({
   const showInvite = gameState.phase === 'waiting' && !!roomCode;
   const { width: sidebarWidth, isResizing, startResize } = useSidebarWidth();
 
+  // Waiting room already uses the main area; duplicating score table + invite on mobile causes overlap.
+  const showMobileScorePanel =
+    gameState.phase !== 'waiting' && gameState.phase !== 'dealing';
+  const mobileScorePanelHeight =
+    gameState.phase === 'round-end' || gameState.phase === 'finished'
+      ? 'min(30vh,220px)'
+      : 'min(28vh,200px)';
+
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex flex-col">
+    <div className="h-dvh min-h-0 overflow-hidden bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex flex-col">
       {onLeave && (
-        <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/10">
-          <div className="flex items-center gap-3 flex-wrap text-white/50 text-xs min-h-[1.75rem]">
+        <div className="flex-shrink-0 flex items-center justify-between gap-2 px-3 sm:px-4 py-2 bg-black/40 border-b border-white/10">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap text-white/50 text-xs min-w-0 flex-1">
             {showInvite && roomCode && (
               <div className="flex items-center gap-2">
                 <span>Room</span>
@@ -38,7 +46,7 @@ export function GameLayout({
           <button
             type="button"
             onClick={onLeave}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition-colors"
+            className="flex-shrink-0 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition-colors"
           >
             Leave Game
           </button>
@@ -72,19 +80,19 @@ export function GameLayout({
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-          <div className="lg:hidden flex-shrink-0 px-2 sm:px-3 pt-2 pb-1 space-y-2">
-            <div className="h-[min(36vh,260px)] min-h-[120px] overflow-hidden flex flex-col">
-              <ScoreTable gameState={gameState} highlightRound={highlightRound} />
+          {showMobileScorePanel && (
+            <div className="lg:hidden flex-shrink-0 px-2 sm:px-3 pt-2 pb-1">
+              <div
+                className="overflow-hidden flex flex-col"
+                style={{ height: mobileScorePanelHeight, minHeight: 100 }}
+              >
+                <ScoreTable gameState={gameState} highlightRound={highlightRound} />
+              </div>
             </div>
-            {showInvite && roomCode && (
-              <RoomInviteShare
-                roomCode={roomCode}
-                hostName={host?.name}
-                variant="sidebar"
-              />
-            )}
+          )}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col lg:overflow-hidden">
+            {children}
           </div>
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">{children}</div>
         </div>
       </div>
     </div>

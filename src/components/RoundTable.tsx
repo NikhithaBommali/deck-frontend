@@ -12,6 +12,7 @@ interface RoundTableProps {
   showDealingHighlight?: boolean;
   flyingCard?: { x: number; y: number; key: number } | null;
   compact?: boolean;
+  dense?: boolean;
 }
 
 export function RoundTable({
@@ -22,18 +23,20 @@ export function RoundTable({
   showDealingHighlight = false,
   flyingCard = null,
   compact = false,
+  dense = false,
 }: RoundTableProps) {
   const mySeat =
     gameState.players.find((p) => p.id === gameState.myId)?.seatIndex ?? 0;
   const total = gameState.players.length;
   const inDealing = gameState.phase === 'dealing';
+  const avatarSize = dense ? 'sm' : compact ? 'md' : 'lg';
 
   return (
     <div
-      className={`relative mx-auto aspect-[4/3] ${
+      className={`relative mx-auto ${
         compact
-          ? 'h-full max-h-full w-auto max-w-full'
-          : 'w-full max-w-3xl min-h-[280px]'
+          ? 'w-[min(100%,260px)] sm:w-[min(100%,320px)] aspect-[4/3] flex-shrink-0'
+          : 'w-full max-w-3xl aspect-[4/3] min-h-[200px] max-h-[min(50vh,420px)]'
       }`}
     >
       {flyingCard && (
@@ -85,7 +88,7 @@ export function RoundTable({
               <PlayerAvatar
                 name={player.name}
                 profilePicture={player.profilePicture}
-                size="lg"
+                size={avatarSize}
                 isHost={player.id === gameState.hostId}
                 isMe={isMe}
               />
@@ -107,7 +110,7 @@ export function RoundTable({
             <PlayerAvatar
               name={player.name}
               profilePicture={player.profilePicture}
-              size="lg"
+              size={avatarSize}
               isHost={player.id === gameState.hostId}
               isActive={
                 (isActive && gameState.phase === 'playing') || isReceiving
@@ -119,13 +122,13 @@ export function RoundTable({
 
             <div
               className={`
-                px-2 py-0.5 rounded-lg text-center backdrop-blur-sm border transition-all
+                px-1.5 py-0.5 rounded-lg text-center backdrop-blur-sm border transition-all max-w-[72px] sm:max-w-[90px]
                 ${isReceiving ? 'bg-gold-500/30 border-gold-400/60 scale-105' : ''}
                 ${!isReceiving && isActive && gameState.phase === 'playing' ? 'bg-green-500/30 border-green-400/50' : ''}
                 ${!isReceiving && !(isActive && gameState.phase === 'playing') ? 'bg-black/50 border-white/10' : ''}
               `}
             >
-              <p className="text-white text-xs font-medium whitespace-nowrap max-w-[90px] truncate">
+              <p className="text-white text-[10px] sm:text-xs font-medium truncate">
                 {player.name}
               </p>
               {showCardCounts && (

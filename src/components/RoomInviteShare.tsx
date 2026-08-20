@@ -51,25 +51,34 @@ export function RoomInviteShare({
 
   if (variant === 'sidebar') {
     return (
-      <div className="rounded-xl border border-gold-500/25 bg-black/40 p-3 space-y-2 flex-shrink-0">
+      <div className="rounded-xl border border-gold-500/25 bg-black/40 p-2.5 sm:p-3 space-y-2 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-gold-400 font-display font-bold text-xs uppercase tracking-wide">
+          <p className="text-gold-400 font-display font-bold text-[10px] sm:text-xs uppercase tracking-wide">
             Invite Friends
           </p>
-          <span className="text-base" aria-hidden>
+          <span className="text-sm sm:text-base" aria-hidden>
             🔗
           </span>
         </div>
 
-        <div>
-          <p className="text-white/40 text-[10px] uppercase tracking-wider">Room Code</p>
-          <p className="font-mono text-xl font-bold text-gold-400 tracking-[0.15em]">
-            {roomCode}
-          </p>
+        <div className="flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-white/40 text-[10px] uppercase tracking-wider">Room Code</p>
+            <p className="font-mono text-lg sm:text-xl font-bold text-gold-400 tracking-[0.12em] sm:tracking-[0.15em]">
+              {roomCode}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleCopyCode}
+            className="flex-shrink-0 px-2 py-1.5 text-[10px] font-semibold rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
+          >
+            Copy
+          </button>
         </div>
 
         <p
-          className="text-white/50 text-[10px] font-mono truncate"
+          className="hidden xs:block text-white/50 text-[10px] font-mono truncate"
           title={inviteUrl}
         >
           {inviteUrl}

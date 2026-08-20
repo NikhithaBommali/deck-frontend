@@ -1,6 +1,7 @@
 import { ClientGameState } from '../types/game';
 import { GameLayout } from './GameLayout';
 import { RoundTable } from './RoundTable';
+import { RoomInviteShare } from './RoomInviteShare';
 import { ScoreBar } from './ScoreBar';
 
 interface WaitingRoomProps {
@@ -25,51 +26,55 @@ export function WaitingRoom({
 
   return (
     <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <header className="flex-shrink-0 px-4 py-2 bg-black/30 border-b border-white/10">
+      <div className="flex flex-col flex-1 min-h-0">
+        <header className="flex-shrink-0 px-3 sm:px-4 py-2 bg-black/30 border-b border-white/10">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
-            <div>
-              <h1 className="font-display text-lg text-gold-400 font-bold">
+            <div className="min-w-0">
+              <h1 className="font-display text-base sm:text-lg text-gold-400 font-bold">
                 Waiting Room
               </h1>
-              <p className="text-white/50 text-xs">
-                Invite friends to join · Room{' '}
+              <p className="text-white/50 text-[10px] sm:text-xs truncate">
+                {gameState.players.length}/6 players ·{' '}
                 <span className="font-mono text-gold-400 tracking-widest">
                   {roomCode}
                 </span>
               </p>
             </div>
-            <span className="text-white/60 text-sm whitespace-nowrap">
-              {gameState.players.length}/6 players
-            </span>
           </div>
         </header>
 
-        <div className="flex-shrink-0 px-4 py-1.5 bg-black/20 border-b border-white/5">
+        <div className="hidden sm:block flex-shrink-0 px-4 py-1.5 bg-black/20 border-b border-white/5">
           <ScoreBar gameState={gameState} showScores={false} />
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col items-center justify-center p-3 gap-3 overflow-hidden">
-          <div className="flex-1 min-h-0 w-full flex items-center justify-center">
+        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+          <div className="flex-shrink-0 px-3 pt-3 sm:pt-4 lg:hidden">
+            <RoomInviteShare roomCode={roomCode} variant="sidebar" />
+          </div>
+
+          <div className="flex-1 min-h-[180px] flex items-center justify-center px-3 py-2">
             <RoundTable
               gameState={gameState}
               showCardCounts={false}
               compact
+              dense
               centerContent={
-                <div className="text-center space-y-1 px-4">
-                  <p className="text-gold-400/80 font-display text-base font-bold">
+                <div className="text-center space-y-0.5 px-2">
+                  <p className="text-gold-400/80 font-display text-sm sm:text-base font-bold">
                     Deck Score
                   </p>
-                  <p className="text-white/40 text-xs">Take a seat at the table</p>
+                  <p className="text-white/40 text-[10px] sm:text-xs">
+                    Take a seat at the table
+                  </p>
                 </div>
               }
             />
           </div>
 
-          <div className="w-full max-w-md space-y-2 flex-shrink-0 pb-1">
+          <div className="flex-shrink-0 sticky bottom-0 px-3 sm:px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-felt-900 via-felt-900/95 to-transparent space-y-2 max-w-md mx-auto w-full">
             <button
               onClick={() => onSetReady(!me?.isReady)}
-              className={`w-full py-2.5 px-4 font-bold rounded-xl transition-all ${
+              className={`w-full py-2.5 px-4 font-bold rounded-xl transition-all text-sm sm:text-base ${
                 me?.isReady
                   ? 'bg-green-600 hover:bg-green-500 text-white'
                   : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
@@ -82,7 +87,7 @@ export function WaitingRoom({
               <button
                 onClick={onStartGame}
                 disabled={!allReady}
-                className="w-full py-2.5 px-4 bg-gold-500 hover:bg-gold-400 disabled:opacity-40 disabled:cursor-not-allowed text-felt-900 font-bold rounded-xl transition-all"
+                className="w-full py-2.5 px-4 bg-gold-500 hover:bg-gold-400 disabled:opacity-40 disabled:cursor-not-allowed text-felt-900 font-bold rounded-xl transition-all text-sm sm:text-base"
               >
                 {allReady ? '▶ Play' : 'Waiting for all players to ready up...'}
               </button>

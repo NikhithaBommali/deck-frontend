@@ -2,6 +2,7 @@ import { Card } from './Card';
 import { GameLayout } from './GameLayout';
 import { DealingTable } from './DealingTable';
 import { ScoreBar } from './ScoreBar';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { ClientGameState, getScoreColorClass, groupHandByRank } from '../types/game';
 
 interface DealingPhaseProps {
@@ -36,31 +37,32 @@ export function DealingPhase({
     gameState.maxScore,
     gameState.showThreshold
   );
+  const isCompact = useMediaQuery('(max-width: 640px)');
 
   return (
     <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-      <header className="px-4 py-3 bg-black/30 border-b border-white/10">
+      <div className="flex flex-col flex-1 min-h-0">
+      <header className="flex-shrink-0 px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border-b border-white/10">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h1 className="font-display text-xl text-gold-400 font-bold">
+          <div className="min-w-0">
+            <h1 className="font-display text-base sm:text-xl text-gold-400 font-bold">
               Round {gameState.roundNumber} — Dealing
             </h1>
-            <p className="text-white/50 text-sm">
+            <p className="text-white/50 text-xs sm:text-sm truncate">
               Room:{' '}
               <span className="font-mono text-gold-400 tracking-widest">{roomCode}</span>
             </p>
           </div>
           {gameState.wildRank && (
-            <div className="px-3 py-1 bg-purple-500/20 rounded-lg border border-purple-500/30 text-sm">
-              <span className="text-purple-300">Zero rank: </span>
+            <div className="px-2 sm:px-3 py-1 bg-purple-500/20 rounded-lg border border-purple-500/30 text-xs sm:text-sm flex-shrink-0">
+              <span className="text-purple-300">Zero: </span>
               <span className="text-purple-200 font-bold">{gameState.wildRank}</span>
             </div>
           )}
         </div>
       </header>
 
-      <div className="px-4 py-2 bg-black/20 border-b border-white/5">
+      <div className="hidden sm:block flex-shrink-0 px-4 py-2 bg-black/20 border-b border-white/5">
         <ScoreBar gameState={gameState} showScores={gameState.isDealingComplete} />
       </div>
 
@@ -87,31 +89,34 @@ export function DealingPhase({
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-center p-4 gap-4 min-h-0 overflow-hidden">
-        <DealingTable
-          gameState={gameState}
-          isHost={isHost}
-          onStartDealing={onStartDealing}
-          onDistributeCards={onDistributeCards}
-        />
+      <div className="flex-1 flex flex-col items-center p-2 sm:p-4 gap-3 sm:gap-4 min-h-0 overflow-y-auto">
+        <div className="w-full flex-shrink-0 flex justify-center max-h-[min(42vh,320px)]">
+          <DealingTable
+            gameState={gameState}
+            isHost={isHost}
+            compact={isCompact}
+            onStartDealing={onStartDealing}
+            onDistributeCards={onDistributeCards}
+          />
+        </div>
 
         {gameState.myHand.length > 0 && (
-          <div className="w-full max-w-4xl bg-black/30 rounded-2xl border border-gold-500/20 p-4 space-y-3 shadow-inner">
+          <div className="w-full max-w-4xl bg-black/30 rounded-xl sm:rounded-2xl border border-gold-500/20 p-3 sm:p-4 space-y-2 sm:space-y-3 shadow-inner flex-shrink-0">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="text-gold-400 font-display text-lg">
+              <h3 className="text-gold-400 font-display text-base sm:text-lg">
                 Your Hand ({gameState.myHand.length}/7)
               </h3>
-              <span className="text-white/70 text-sm">
+              <span className="text-white/70 text-xs sm:text-sm">
                 Score:{' '}
-                <span className={`font-bold text-lg ${scoreColor}`}>
+                <span className={`font-bold text-base sm:text-lg ${scoreColor}`}>
                   {gameState.myHandScore}/{gameState.maxScore}
                 </span>
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-2 min-h-[4rem]">
+            <div className="flex flex-wrap gap-2 min-h-[3.5rem] sm:min-h-[4rem] overflow-x-auto pb-1">
               {rankGroups.map((group) => (
-                <div key={group.key} className="relative flex items-end">
+                <div key={group.key} className="relative flex items-end flex-shrink-0">
                   {group.cards.map((card, i) => (
                     <div
                       key={card.id}
@@ -120,7 +125,7 @@ export function DealingPhase({
                         i > 0 ? { left: i * 10, bottom: i * 2, zIndex: i } : undefined
                       }
                     >
-                      <Card card={card} zeroRank={gameState.wildRank} />
+                      <Card card={card} zeroRank={gameState.wildRank} small={isCompact} />
                     </div>
                   ))}
                   {group.cards.length > 1 && (

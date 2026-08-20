@@ -8,7 +8,7 @@ import { getInviteCodeFromUrl } from './utils/roomInvite';
 
 function ReconnectingScreen() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex items-center justify-center p-4">
       <div className="text-center space-y-4">
         <div className="text-5xl animate-pulse">🃏</div>
         <h2 className="font-display text-2xl text-gold-400 font-bold">

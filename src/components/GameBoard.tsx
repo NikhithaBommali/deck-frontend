@@ -131,7 +131,9 @@ export function GameBoard({
       >
         <div className="flex-1 flex flex-col">
           <header className="px-2 sm:px-4 py-2 sm:py-3 bg-black/30 border-b border-white/10 flex-shrink-0">
-            <ScoreBar gameState={gameState} />
+            <div className="hidden sm:block">
+              <ScoreBar gameState={gameState} />
+            </div>
           </header>
 
           <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-y-auto min-h-0">
@@ -256,7 +258,9 @@ export function GameBoard({
                 : `${currentPlayer?.name ?? 'Opponent'}'s Turn`}
             </div>
           </div>
-          <ScoreBar gameState={gameState} />
+          <div className="hidden sm:block">
+            <ScoreBar gameState={gameState} />
+          </div>
         </header>
 
         <div
@@ -286,11 +290,12 @@ export function GameBoard({
           </div>
         </div>
 
-        <div className="flex-1 p-2 sm:p-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 overflow-y-auto flex flex-col">
-          <div className="flex-shrink-0 min-h-[160px] sm:min-h-[240px] max-h-[42vh] sm:max-h-none">
+        <div className="flex-1 p-2 sm:p-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 flex flex-col">
+          <div className="flex-shrink-0 flex justify-center w-full">
             <RoundTable
               gameState={gameState}
               compact={isCompact}
+              dense={isCompact}
               centerContent={
               <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
                 <button

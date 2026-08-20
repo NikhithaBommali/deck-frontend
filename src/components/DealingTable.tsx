@@ -8,6 +8,7 @@ import { getSeatPosition } from '../utils/tableLayout';
 interface DealingTableProps {
   gameState: ClientGameState;
   isHost: boolean;
+  compact?: boolean;
   onStartDealing: () => void;
   onDistributeCards: () => void;
 }
@@ -15,6 +16,7 @@ interface DealingTableProps {
 export function DealingTable({
   gameState,
   isHost,
+  compact = false,
   onStartDealing,
   onDistributeCards,
 }: DealingTableProps) {
@@ -67,12 +69,14 @@ export function DealingTable({
       faceDownCards
       showDealingHighlight
       flyingCard={flyingCard}
+      compact={compact}
+      dense={compact}
       centerContent={
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex items-end gap-5 justify-center">
+        <div className="flex flex-col items-center gap-2 sm:gap-4 max-w-[90%]">
+          <div className="flex items-end gap-3 sm:gap-5 justify-center">
             {gameState.openCard && (
-              <div className="text-center space-y-1.5">
-                <p className="text-white/50 text-[10px] uppercase tracking-wider">
+              <div className="text-center space-y-1">
+                <p className="text-white/50 text-[9px] sm:text-[10px] uppercase tracking-wider">
                   Open
                 </p>
                 <Card
@@ -92,23 +96,23 @@ export function DealingTable({
           {!dealingStarted && isHost && (
             <button
               onClick={onStartDealing}
-              className="px-8 py-3 bg-gold-500 hover:bg-gold-400 text-felt-900 font-bold rounded-xl transition-all text-base shadow-xl hover:scale-105 active:scale-95 ring-2 ring-gold-300/50"
+              className="px-4 sm:px-8 py-2 sm:py-3 bg-gold-500 hover:bg-gold-400 text-felt-900 font-bold rounded-xl transition-all text-xs sm:text-base shadow-xl hover:scale-105 active:scale-95 ring-2 ring-gold-300/50"
             >
               Distribute Cards
             </button>
           )}
 
           {!dealingStarted && !isHost && (
-            <p className="text-gold-400/80 text-sm px-4 py-2 bg-black/30 rounded-lg border border-white/10">
-              Waiting for host to distribute from the deck...
+            <p className="text-gold-400/80 text-[10px] sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 bg-black/30 rounded-lg border border-white/10 text-center">
+              Waiting for host to distribute...
             </p>
           )}
 
           {dealingInProgress && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-full border border-gold-500/30">
+            <div className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-black/40 rounded-full border border-gold-500/30">
               <span className="w-2 h-2 rounded-full bg-gold-400 animate-ping" />
-              <p className="text-gold-300 text-sm font-medium">
-                Dealing from center...
+              <p className="text-gold-300 text-[10px] sm:text-sm font-medium">
+                Dealing...
               </p>
             </div>
           )}
@@ -116,15 +120,15 @@ export function DealingTable({
           {gameState.isDealingComplete && isHost && (
             <button
               onClick={onDistributeCards}
-              className="px-8 py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all text-base shadow-xl hover:scale-105 active:scale-95 animate-pulse"
+              className="px-4 sm:px-8 py-2 sm:py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all text-xs sm:text-base shadow-xl hover:scale-105 active:scale-95 animate-pulse"
             >
               Start Round
             </button>
           )}
 
           {gameState.isDealingComplete && !isHost && (
-            <p className="text-green-400/80 text-sm px-4 py-2 bg-green-500/10 rounded-lg border border-green-500/20">
-              All cards dealt — waiting for host to start...
+            <p className="text-green-400/80 text-[10px] sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500/10 rounded-lg border border-green-500/20 text-center">
+              All cards dealt — waiting for host...
             </p>
           )}
         </div>

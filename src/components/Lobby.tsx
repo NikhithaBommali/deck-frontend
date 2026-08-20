@@ -97,7 +97,7 @@ export function Lobby({
     mode === 'join' && (peekLoading || !!roomPeek || joinCode.length === 6);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex items-center justify-center p-4">
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
