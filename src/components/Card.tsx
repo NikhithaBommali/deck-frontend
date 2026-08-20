@@ -25,7 +25,9 @@ export function Card({
   onClick,
 }: CardProps) {
   const isZero = isZeroScoreCard(card, zeroRank);
-  const sizeClass = small ? 'w-12 h-[4.25rem]' : 'w-16 h-[5.6rem]';
+  const sizeClass = small
+    ? 'w-10 h-[3.5rem] xs:w-12 xs:h-[4.25rem] sm:w-12 sm:h-[4.25rem]'
+    : 'w-14 h-[4.9rem] sm:w-16 sm:h-[5.6rem]';
 
   if (faceDown || card.id === 'hidden') {
     return <CardBack size={small ? 'md' : 'xl'} />;

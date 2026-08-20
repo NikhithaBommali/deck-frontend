@@ -10,6 +10,7 @@ import {
   getScoreColorClass,
   groupHandByRank,
 } from '../types/game';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 interface GameBoardProps {
   gameState: ClientGameState;
@@ -78,16 +79,18 @@ export function GameBoard({
     if (canPlace) onPlaceCard(cardIds);
   };
 
+  const isCompact = useMediaQuery('(max-width: 640px)');
+
   if (gameState.phase === 'finished') {
     const sorted = [...gameState.players].sort(
       (a, b) => a.totalScore - b.totalScore
     );
     return (
       <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-black/40 backdrop-blur rounded-2xl border border-white/10 p-8 text-center space-y-6">
-            <div className="text-6xl">🎉</div>
-            <h2 className="font-display text-3xl text-gold-400 font-bold">
+        <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-black/40 backdrop-blur rounded-xl sm:rounded-2xl border border-white/10 p-5 sm:p-8 text-center space-y-4 sm:space-y-6">
+            <div className="text-5xl sm:text-6xl">🎉</div>
+            <h2 className="font-display text-2xl sm:text-3xl text-gold-400 font-bold">
               Game Over!
             </h2>
             <p className="text-white/80">
@@ -108,9 +111,7 @@ export function GameBoard({
                     {p.id === gameState.myId && ' (you)'}
                     {p.isEliminated && ' — out'}
                   </span>
-                  {p.id === gameState.myId ? (
-                    <span className="font-bold text-gold-400">{p.totalScore}</span>
-                  ) : null}
+                  <span className="font-bold text-gold-400">{p.totalScore}</span>
                 </div>
               ))}
             </div>
@@ -129,14 +130,14 @@ export function GameBoard({
         onLeave={onLeave}
       >
         <div className="flex-1 flex flex-col">
-          <header className="px-4 py-3 bg-black/30 border-b border-white/10">
+          <header className="px-2 sm:px-4 py-2 sm:py-3 bg-black/30 border-b border-white/10 flex-shrink-0">
             <ScoreBar gameState={gameState} />
           </header>
 
-          <div className="flex-1 flex items-center justify-center p-4">
-            <div className="w-full max-w-lg bg-black/40 backdrop-blur rounded-2xl border border-white/10 p-8 text-center space-y-6">
-              <div className="text-6xl">{gameState.showPenalty ? '💥' : '🏆'}</div>
-              <h2 className="font-display text-3xl text-gold-400 font-bold">
+          <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-y-auto min-h-0">
+            <div className="w-full max-w-lg bg-black/40 backdrop-blur rounded-xl sm:rounded-2xl border border-white/10 p-5 sm:p-8 text-center space-y-4 sm:space-y-6 my-auto">
+              <div className="text-5xl sm:text-6xl">{gameState.showPenalty ? '💥' : '🏆'}</div>
+              <h2 className="font-display text-2xl sm:text-3xl text-gold-400 font-bold">
                 Round {gameState.roundNumber} Complete
               </h2>
 
@@ -183,18 +184,14 @@ export function GameBoard({
                           {p.isEliminated && ' — OUT'}
                         </span>
                         <span className="flex items-center gap-3">
-                          {p.id === gameState.myId ? (
-                            <>
-                              <span
-                                className={`font-bold ${roundPts === 0 ? 'text-green-400' : 'text-white/80'}`}
-                              >
-                                +{roundPts}
-                              </span>
-                              <span className="text-gold-400/80 text-sm">
-                                → {p.totalScore}
-                              </span>
-                            </>
-                          ) : null}
+                          <span
+                            className={`font-bold ${roundPts === 0 ? 'text-green-400' : 'text-white/80'}`}
+                          >
+                            +{roundPts}
+                          </span>
+                          <span className="text-gold-400/80 text-sm">
+                            → {p.totalScore}
+                          </span>
                         </span>
                       </div>
                     );
@@ -232,13 +229,13 @@ export function GameBoard({
   return (
     <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <header className="px-4 py-2 bg-black/30 border-b border-white/10">
+        <header className="px-2 sm:px-4 py-2 bg-black/30 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-            <div className="flex items-center gap-4">
-              <span className="font-display text-xl text-gold-400 font-bold">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap min-w-0">
+              <span className="font-display text-base sm:text-xl text-gold-400 font-bold">
                 Deck Score
               </span>
-              <span className="text-white/40 text-sm">
+              <span className="text-white/40 text-xs sm:text-sm truncate">
                 Round {gameState.roundNumber} ·{' '}
                 <span className="font-mono text-gold-400">{roomCode}</span>
               </span>
@@ -248,7 +245,7 @@ export function GameBoard({
               </span>
             </div>
             <div
-              className={`px-3 py-1 rounded-lg text-sm font-semibold ${
+              className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap ${
                 gameState.isMyTurn
                   ? 'bg-green-500/30 text-green-300 border border-green-500/40 animate-pulse'
                   : 'bg-white/10 text-white/60'
@@ -263,35 +260,39 @@ export function GameBoard({
         </header>
 
         <div
-          className={`px-4 py-2 text-center text-sm font-medium border-b ${
+          className={`px-2 sm:px-4 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-medium border-b flex-shrink-0 ${
             gameState.isMyTurn
               ? 'bg-green-600/30 border-green-500/40 text-green-100'
               : 'bg-amber-600/20 border-amber-500/30 text-amber-100'
           }`}
         >
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 max-w-6xl mx-auto">
             {gameState.isMyTurn ? (
-              <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
             ) : (
-              <span className="text-lg">⏳</span>
+              <span className="text-base sm:text-lg flex-shrink-0">⏳</span>
             )}
-            <span>
+            <span className="line-clamp-2 sm:line-clamp-none text-left sm:text-center">
               {gameState.isMyTurn ? (
                 <strong>YOUR TURN{myName ? ` (${myName})` : ''}</strong>
               ) : (
                 <strong>{currentPlayer?.name ?? 'Opponent'}&apos;s turn</strong>
               )}
-              {' — '}
-              {turnMessage}
+              <span className="hidden xs:inline"> — </span>
+              <span className="block sm:inline text-[11px] sm:text-sm opacity-90">
+                {turnMessage}
+              </span>
             </span>
           </div>
         </div>
 
-        <div className="flex-1 p-4 max-w-6xl mx-auto w-full space-y-4 min-h-0 overflow-hidden flex flex-col">
-          <RoundTable
-            gameState={gameState}
-            centerContent={
-              <div className="flex items-center justify-center gap-4 flex-wrap">
+        <div className="flex-1 p-2 sm:p-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 overflow-y-auto flex flex-col">
+          <div className="flex-shrink-0 min-h-[160px] sm:min-h-[240px] max-h-[42vh] sm:max-h-none">
+            <RoundTable
+              gameState={gameState}
+              compact={isCompact}
+              centerContent={
+              <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
                 <button
                   onClick={onDrawDeck}
                   disabled={!gameState.mustDrawAfterPlace}
@@ -299,7 +300,7 @@ export function GameBoard({
                 >
                   <p className="text-white/50 text-[10px] uppercase tracking-wider">Draw</p>
                   <CardBack
-                    size="md"
+                    size={isCompact ? 'md' : 'xl'}
                     className={`transition-all ${
                       gameState.mustDrawAfterPlace
                         ? 'ring-2 ring-yellow-400/50 animate-pulse group-hover:-translate-y-1'
@@ -321,7 +322,7 @@ export function GameBoard({
                     <Card
                       card={gameState.openCard}
                       zeroRank={gameState.wildRank}
-                      small
+                      small={isCompact}
                     />
                   </div>
                 )}
@@ -336,22 +337,23 @@ export function GameBoard({
                 />
               </div>
             }
-          />
+            />
+          </div>
 
           {!me?.isEliminated && (
             <div
-              className={`bg-black/20 rounded-2xl border p-4 space-y-3 transition-opacity ${
+              className={`bg-black/20 rounded-xl sm:rounded-2xl border p-2 sm:p-4 space-y-2 sm:space-y-3 transition-opacity flex-shrink-0 ${
                 gameState.isMyTurn ? 'border-white/10' : 'border-white/5 opacity-80'
               }`}
             >
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-gold-400 font-display text-lg">
-                  Your Hand ({gameState.myHand.length} cards)
+                <h3 className="text-gold-400 font-display text-base sm:text-lg">
+                  Your Hand ({gameState.myHand.length})
                 </h3>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   {canPlace && (
-                    <span className="text-green-300 text-xs font-medium">
-                      Tap a group — same ranks discard together
+                    <span className="text-green-300 text-[10px] sm:text-xs font-medium">
+                      Tap a group to place
                     </span>
                   )}
                   <span className="text-white/70 text-sm">
@@ -366,7 +368,7 @@ export function GameBoard({
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3 min-h-[5rem]">
+              <div className="flex flex-wrap gap-2 sm:gap-3 min-h-[4rem] sm:min-h-[5rem] overflow-x-auto pb-1">
                 {rankGroups.map((group) => {
                   const rep = group.cards[0];
                   const isMatching =
@@ -399,6 +401,7 @@ export function GameBoard({
                               zeroRank={gameState.wildRank}
                               highlight={isMatching && i === 0}
                               disabled={!canPlace}
+                              small={isCompact}
                             />
                           </div>
                         ))}

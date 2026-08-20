@@ -72,8 +72,8 @@ export function GameLayout({
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-          <div className="lg:hidden flex-shrink-0 px-3 pt-3 space-y-2 max-h-[40vh] overflow-hidden">
-            <div className="max-h-32 overflow-hidden">
+          <div className="lg:hidden flex-shrink-0 px-2 sm:px-3 pt-2 pb-1 space-y-2">
+            <div className="h-[min(36vh,260px)] min-h-[120px] overflow-hidden flex flex-col">
               <ScoreTable gameState={gameState} highlightRound={highlightRound} />
             </div>
             {showInvite && roomCode && (

@@ -11,13 +11,13 @@ interface ScoreTableProps {
 export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
   const { layout, resizeColumn, resetLayout } = useScoreTableLayout();
   const sorted = [...gameState.players].sort((a, b) => a.seatIndex - b.seatIndex);
-  const visiblePlayers = sorted.filter((p) => p.id === gameState.myId);
   const maxRounds = Math.max(
     gameState.roundNumber,
     ...sorted.map((p) => p.roundScores.length),
     1
   );
   const roundRows = Array.from({ length: maxRounds }, (_, i) => i + 1);
+  const tableMinWidth = layout.labelColWidth + sorted.length * layout.playerColWidth;
 
   const thBase =
     'relative px-2 py-1 text-white/50 text-xs uppercase tracking-wider bg-black/60 backdrop-blur-sm';
@@ -33,39 +33,39 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
   );
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden h-full flex flex-col">
-      <div className="px-4 py-3 border-b border-white/10 bg-black/20 flex-shrink-0">
+    <div className="bg-black/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10 overflow-hidden h-full flex flex-col">
+      <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-white/10 bg-black/20 flex-shrink-0">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="font-display text-gold-400 font-bold text-lg">
+          <div className="min-w-0">
+            <h2 className="font-display text-gold-400 font-bold text-base sm:text-lg">
               Score Table
             </h2>
-            <p className="text-white/40 text-xs mt-0.5">
+            <p className="text-white/40 text-[10px] sm:text-xs mt-0.5">
               Out at {gameState.eliminationScore}+ · Round {gameState.roundNumber}
             </p>
           </div>
           <button
             type="button"
             onClick={resetLayout}
-            className="text-[10px] text-white/40 hover:text-gold-300 transition-colors whitespace-nowrap pt-0.5"
+            className="hidden sm:inline text-[10px] text-white/40 hover:text-gold-300 transition-colors whitespace-nowrap pt-0.5"
             title="Reset column and row sizes"
           >
             Reset sizes
           </button>
         </div>
-        <p className="text-white/30 text-[10px] mt-1.5">
+        <p className="hidden sm:block text-white/30 text-[10px] mt-1.5">
           Rounds down · Players across · Drag edges to resize
         </p>
       </div>
 
       <div className="overflow-auto flex-1 min-h-0">
         <table
-          className="text-sm border-collapse"
-          style={{ tableLayout: 'fixed', minWidth: '100%' }}
+          className="text-sm border-collapse w-full"
+          style={{ tableLayout: 'fixed', minWidth: tableMinWidth }}
         >
           <colgroup>
             <col style={{ width: layout.labelColWidth }} />
-            {visiblePlayers.map((player) => (
+            {sorted.map((player) => (
               <col key={player.id} style={{ width: layout.playerColWidth }} />
             ))}
           </colgroup>
@@ -76,16 +76,18 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
             >
               <th className={`${thBase} text-left sticky left-0 z-10`}>
                 Round
-                <ResizeHandle
-                  direction="column"
-                  onResize={(d) => resizeColumn('labelColWidth', d)}
-                />
-                <ResizeHandle
-                  direction="row"
-                  onResize={(d) => resizeColumn('headerRowHeight', d)}
-                />
+                <span className="hidden sm:inline">
+                  <ResizeHandle
+                    direction="column"
+                    onResize={(d) => resizeColumn('labelColWidth', d)}
+                  />
+                  <ResizeHandle
+                    direction="row"
+                    onResize={(d) => resizeColumn('headerRowHeight', d)}
+                  />
+                </span>
               </th>
-              {visiblePlayers.map((player) => {
+              {sorted.map((player) => {
                 const isMe = player.id === gameState.myId;
                 return (
                   <th
@@ -117,10 +119,12 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
                         </span>
                       )}
                     </div>
-                    <ResizeHandle
-                      direction="column"
-                      onResize={(d) => resizeColumn('playerColWidth', d)}
-                    />
+                    <span className="hidden sm:inline">
+                      <ResizeHandle
+                        direction="column"
+                        onResize={(d) => resizeColumn('playerColWidth', d)}
+                      />
+                    </span>
                   </th>
                 );
               })}
@@ -147,12 +151,14 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
                     }`}
                   >
                     R{round}
-                    <ResizeHandle
-                      direction="row"
-                      onResize={(d) => resizeColumn('rowHeight', d)}
-                    />
+                    <span className="hidden sm:inline">
+                      <ResizeHandle
+                        direction="row"
+                        onResize={(d) => resizeColumn('rowHeight', d)}
+                      />
+                    </span>
                   </td>
-                  {visiblePlayers.map((player) => (
+                  {sorted.map((player) => (
                     <td
                       key={player.id}
                       className={`px-1 py-1 text-center align-middle overflow-hidden ${
@@ -174,12 +180,14 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
             >
               <td className="px-2 py-1 sticky left-0 z-[1] bg-black/50 backdrop-blur-sm text-gold-400/80 font-bold text-xs uppercase relative">
                 Total
-                <ResizeHandle
-                  direction="row"
-                  onResize={(d) => resizeColumn('rowHeight', d)}
-                />
+                <span className="hidden sm:inline">
+                  <ResizeHandle
+                    direction="row"
+                    onResize={(d) => resizeColumn('rowHeight', d)}
+                  />
+                </span>
               </td>
-              {visiblePlayers.map((player) => (
+              {sorted.map((player) => (
                 <td
                   key={player.id}
                   className={`px-1 py-1 text-center align-middle ${
