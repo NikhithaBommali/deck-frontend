@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="6" fill="#0d4a2e"/>
+  <!-- back card -->
+  <rect x="6" y="5" width="14" height="20" rx="2" fill="#1e3a8a" stroke="#3b82f6" stroke-width="0.8" transform="rotate(-12 13 15)"/>
+  <rect x="8" y="8" width="10" height="14" rx="1" fill="#1e40af" transform="rotate(-12 13 15)"/>
+  <!-- middle card -->
+  <rect x="9" y="4" width="14" height="20" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="0.8" transform="rotate(-4 16 14)"/>
+  <text x="16" y="12" font-family="Georgia, serif" font-size="5" font-weight="bold" fill="#dc2626" text-anchor="middle" transform="rotate(-4 16 14)">A</text>
+  <text x="16" y="19" font-size="7" fill="#dc2626" text-anchor="middle" transform="rotate(-4 16 14)">?</text>
+  <!-- front card -->
+  <rect x="12" y="3" width="14" height="20" rx="2" fill="#fff" stroke="#d1d5db" stroke-width="0.8"/>
+  <text x="19" y="11" font-family="Georgia, serif" font-size="5" font-weight="bold" fill="#111827" text-anchor="middle">K</text>
+  <text x="19" y="18" font-size="7" fill="#111827" text-anchor="middle">?</text>
+  <!-- gold accent -->
+  <circle cx="26" cy="26" r="4" fill="#e6b422"/>
+  <text x="26" y="28" font-size="5" font-weight="bold" fill="#0d4a2e" text-anchor="middle">7</text>
+</svg>
