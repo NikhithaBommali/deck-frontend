@@ -11,6 +11,7 @@ interface ScoreTableProps {
 export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
   const { layout, resizeColumn, resetLayout } = useScoreTableLayout();
   const sorted = [...gameState.players].sort((a, b) => a.seatIndex - b.seatIndex);
+  const visiblePlayers = sorted.filter((p) => p.id === gameState.myId);
   const maxRounds = Math.max(
     gameState.roundNumber,
     ...sorted.map((p) => p.roundScores.length),
@@ -64,7 +65,7 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
         >
           <colgroup>
             <col style={{ width: layout.labelColWidth }} />
-            {sorted.map((player) => (
+            {visiblePlayers.map((player) => (
               <col key={player.id} style={{ width: layout.playerColWidth }} />
             ))}
           </colgroup>
@@ -84,7 +85,7 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
                   onResize={(d) => resizeColumn('headerRowHeight', d)}
                 />
               </th>
-              {sorted.map((player) => {
+              {visiblePlayers.map((player) => {
                 const isMe = player.id === gameState.myId;
                 return (
                   <th
@@ -151,7 +152,7 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
                       onResize={(d) => resizeColumn('rowHeight', d)}
                     />
                   </td>
-                  {sorted.map((player) => (
+                  {visiblePlayers.map((player) => (
                     <td
                       key={player.id}
                       className={`px-1 py-1 text-center align-middle overflow-hidden ${
@@ -178,7 +179,7 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
                   onResize={(d) => resizeColumn('rowHeight', d)}
                 />
               </td>
-              {sorted.map((player) => (
+              {visiblePlayers.map((player) => (
                 <td
                   key={player.id}
                   className={`px-1 py-1 text-center align-middle ${

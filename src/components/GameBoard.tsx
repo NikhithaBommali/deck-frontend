@@ -108,7 +108,9 @@ export function GameBoard({
                     {p.id === gameState.myId && ' (you)'}
                     {p.isEliminated && ' — out'}
                   </span>
-                  <span className="font-bold text-gold-400">{p.totalScore}</span>
+                  {p.id === gameState.myId ? (
+                    <span className="font-bold text-gold-400">{p.totalScore}</span>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -181,14 +183,18 @@ export function GameBoard({
                           {p.isEliminated && ' — OUT'}
                         </span>
                         <span className="flex items-center gap-3">
-                          <span
-                            className={`font-bold ${roundPts === 0 ? 'text-green-400' : 'text-white/80'}`}
-                          >
-                            +{roundPts}
-                          </span>
-                          <span className="text-gold-400/80 text-sm">
-                            → {p.totalScore}
-                          </span>
+                          {p.id === gameState.myId ? (
+                            <>
+                              <span
+                                className={`font-bold ${roundPts === 0 ? 'text-green-400' : 'text-white/80'}`}
+                              >
+                                +{roundPts}
+                              </span>
+                              <span className="text-gold-400/80 text-sm">
+                                → {p.totalScore}
+                              </span>
+                            </>
+                          ) : null}
                         </span>
                       </div>
                     );

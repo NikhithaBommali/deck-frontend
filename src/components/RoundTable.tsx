@@ -135,7 +135,9 @@ export function RoundTable({
                     : faceDownCards
                       ? '7 🂠'
                       : `${player.cardCount} cards`}
-                  {gameState.phase === 'playing' && ` · ${player.handScore}pts`}
+                  {gameState.phase === 'playing' &&
+                    isMe &&
+                    ` · ${player.handScore}pts`}
                 </p>
               )}
               {gameState.phase === 'waiting' && (
