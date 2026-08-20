@@ -58,6 +58,7 @@ export function WaitingRoom({
               showCardCounts={false}
               compact
               dense
+              seatSpread="wide"
               centerContent={
                 <div className="text-center space-y-0.5 px-2">
                   <p className="text-gold-400/80 font-display text-sm sm:text-base font-bold">

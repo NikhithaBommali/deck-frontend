@@ -13,6 +13,7 @@ interface RoundTableProps {
   flyingCard?: { x: number; y: number; key: number } | null;
   compact?: boolean;
   dense?: boolean;
+  seatSpread?: 'normal' | 'wide';
 }
 
 export function RoundTable({
@@ -24,6 +25,7 @@ export function RoundTable({
   flyingCard = null,
   compact = false,
   dense = false,
+  seatSpread = 'normal',
 }: RoundTableProps) {
   const mySeat =
     gameState.players.find((p) => p.id === gameState.myId)?.seatIndex ?? 0;
@@ -35,7 +37,7 @@ export function RoundTable({
     <div
       className={`relative mx-auto ${
         compact
-          ? 'w-[min(100%,260px)] sm:w-[min(100%,320px)] aspect-[4/3] flex-shrink-0'
+          ? 'w-full max-w-[340px] aspect-[5/3] flex-shrink-0'
           : 'w-full max-w-3xl aspect-[4/3] min-h-[200px] max-h-[min(50vh,420px)]'
       }`}
     >
@@ -62,12 +64,14 @@ export function RoundTable({
           }}
         />
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto">{centerContent}</div>
+          {centerContent ? (
+            <div className="pointer-events-auto max-w-[85%]">{centerContent}</div>
+          ) : null}
         </div>
       </div>
 
       {gameState.players.map((player) => {
-        const pos = getSeatPosition(player.seatIndex, mySeat, total);
+        const pos = getSeatPosition(player.seatIndex, mySeat, total, seatSpread);
         const isActive = player.id === gameState.currentTurnPlayerId;
         const isMe = player.id === gameState.myId;
         const isAway = !player.isConnected && gameState.phase !== 'waiting';

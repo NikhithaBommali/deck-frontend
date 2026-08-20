@@ -90,7 +90,7 @@ export function DealingPhase({
       )}
 
       <div className="flex-1 flex flex-col items-center p-2 sm:p-4 gap-3 sm:gap-4 min-h-0 overflow-y-auto">
-        <div className="w-full flex-shrink-0 flex justify-center max-h-[min(42vh,320px)]">
+        <div className="w-full flex-shrink-0 flex justify-center">
           <DealingTable
             gameState={gameState}
             isHost={isHost}

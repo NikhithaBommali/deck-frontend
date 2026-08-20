@@ -81,6 +81,51 @@ export function GameBoard({
 
   const isCompact = useMediaQuery('(max-width: 640px)');
 
+  const tableControls = (
+    <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+      <button
+        onClick={onDrawDeck}
+        disabled={!gameState.mustDrawAfterPlace}
+        className="group relative disabled:opacity-40 disabled:cursor-not-allowed text-center space-y-1"
+      >
+        <p className="text-white/50 text-[10px] uppercase tracking-wider">Draw</p>
+        <CardBack
+          size={isCompact ? 'md' : 'xl'}
+          className={`transition-all ${
+            gameState.mustDrawAfterPlace
+              ? 'ring-2 ring-yellow-400/50 animate-pulse group-hover:-translate-y-1'
+              : ''
+          }`}
+        />
+        {gameState.mustDrawAfterPlace && (
+          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gold-300 bg-black/60 px-1.5 py-0.5 rounded-full">
+            +1
+          </span>
+        )}
+      </button>
+
+      {gameState.openCard && (
+        <div className="text-center space-y-1">
+          <p className="text-white/50 text-[10px] uppercase tracking-wider">Open</p>
+          <Card
+            card={gameState.openCard}
+            zeroRank={gameState.wildRank}
+            small={isCompact}
+          />
+        </div>
+      )}
+
+      <DiscardPile
+        discardTop={gameState.discardTop}
+        pickableDiscardCard={gameState.pickableDiscardCard}
+        myPlacedOnDiscard={gameState.myPlacedOnDiscard}
+        wildRank={gameState.wildRank}
+        canPick={gameState.canPickFromDiscard}
+        onPick={onPickFromDiscard}
+      />
+    </div>
+  );
+
   if (gameState.phase === 'finished') {
     const sorted = [...gameState.players].sort(
       (a, b) => a.totalScore - b.totalScore
@@ -296,54 +341,16 @@ export function GameBoard({
               gameState={gameState}
               compact={isCompact}
               dense={isCompact}
-              centerContent={
-              <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
-                <button
-                  onClick={onDrawDeck}
-                  disabled={!gameState.mustDrawAfterPlace}
-                  className="group relative disabled:opacity-40 disabled:cursor-not-allowed text-center space-y-1"
-                >
-                  <p className="text-white/50 text-[10px] uppercase tracking-wider">Draw</p>
-                  <CardBack
-                    size={isCompact ? 'md' : 'xl'}
-                    className={`transition-all ${
-                      gameState.mustDrawAfterPlace
-                        ? 'ring-2 ring-yellow-400/50 animate-pulse group-hover:-translate-y-1'
-                        : ''
-                    }`}
-                  />
-                  {gameState.mustDrawAfterPlace && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gold-300 bg-black/60 px-1.5 py-0.5 rounded-full">
-                      +1
-                    </span>
-                  )}
-                </button>
-
-                {gameState.openCard && (
-                  <div className="text-center space-y-1">
-                    <p className="text-white/50 text-[10px] uppercase tracking-wider">
-                      Open
-                    </p>
-                    <Card
-                      card={gameState.openCard}
-                      zeroRank={gameState.wildRank}
-                      small={isCompact}
-                    />
-                  </div>
-                )}
-
-                <DiscardPile
-                  discardTop={gameState.discardTop}
-                  pickableDiscardCard={gameState.pickableDiscardCard}
-                  myPlacedOnDiscard={gameState.myPlacedOnDiscard}
-                  wildRank={gameState.wildRank}
-                  canPick={gameState.canPickFromDiscard}
-                  onPick={onPickFromDiscard}
-                />
-              </div>
-            }
+              seatSpread={isCompact ? 'wide' : 'normal'}
+              centerContent={isCompact ? undefined : tableControls}
             />
           </div>
+
+          {isCompact && (
+            <div className="flex-shrink-0 w-full rounded-xl bg-black/30 border border-white/10 p-3">
+              {tableControls}
+            </div>
+          )}
 
           {!me?.isEliminated && (
             <div
