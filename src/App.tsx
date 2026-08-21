@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { useSocket } from './hooks/useSocket';
+import { useGameSession } from './hooks/useGameSession';
 import { Lobby } from './components/Lobby';
 import { WaitingRoom } from './components/WaitingRoom';
 import { DealingPhase } from './components/DealingPhase';
 import { GameBoard } from './components/GameBoard';
+import { DemoHintBar } from './components/DemoHintBar';
 import { getInviteCodeFromUrl } from './utils/roomInvite';
 
 function ReconnectingScreen() {
@@ -23,12 +24,12 @@ function ReconnectingScreen() {
 }
 
 function App() {
-  const socket = useSocket();
+  const session = useGameSession();
   const inviteCode = useMemo(() => getInviteCodeFromUrl(), []);
 
   const handleLeave = async () => {
-    if (socket.gameState?.phase === 'finished') {
-      await socket.leaveRoom();
+    if (session.isDemo || session.gameState?.phase === 'finished') {
+      await session.leaveRoom();
       return;
     }
 
@@ -36,72 +37,87 @@ function App() {
       'Leave this game? You will forfeit your seat and others can continue without you.'
     );
     if (confirmed) {
-      await socket.leaveRoom();
+      await session.leaveRoom();
     }
   };
 
   useEffect(() => {
-    if (socket.gameState?.phase !== 'finished') return;
+    if (session.gameState?.phase !== 'finished') return;
 
     const timer = window.setTimeout(() => {
-      void socket.leaveRoom();
+      void session.leaveRoom();
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [socket.gameState?.phase, socket.leaveRoom]);
+  }, [session.gameState?.phase, session.leaveRoom]);
 
-  if (socket.reconnecting && !socket.gameState) {
+  const demoHint =
+    session.isDemo && session.demoHint ? (
+      <DemoHintBar hint={session.demoHint} />
+    ) : null;
+
+  if (session.reconnecting && !session.gameState) {
     return <ReconnectingScreen />;
   }
 
-  if (!socket.gameState) {
+  if (!session.gameState) {
     return (
       <Lobby
-        connected={socket.connected}
+        connected={session.connected}
         initialJoinCode={inviteCode}
-        onCreateRoom={(name, picture) => socket.createRoom(name, picture)}
-        onJoinRoom={(code, name, picture) => socket.joinRoom(code, name, picture)}
-        onPeekRoom={(code) => socket.peekRoom(code)}
-        error={socket.error}
+        onCreateRoom={(name, picture) => session.createRoom(name, picture)}
+        onJoinRoom={(code, name, picture) => session.joinRoom(code, name, picture)}
+        onPeekRoom={(code) => session.peekRoom(code)}
+        onStartDemo={() => session.startDemo()}
+        error={session.error}
       />
     );
   }
 
-  if (socket.gameState.phase === 'waiting') {
+  if (session.gameState.phase === 'waiting') {
     return (
-      <WaitingRoom
-        gameState={socket.gameState}
-        roomCode={socket.roomCode || ''}
-        onSetReady={(ready) => socket.setReady(ready)}
-        onStartGame={() => socket.startGame()}
-        onLeave={handleLeave}
-      />
+      <>
+        <WaitingRoom
+          gameState={session.gameState}
+          roomCode={session.roomCode || ''}
+          onSetReady={(ready) => session.setReady(ready)}
+          onStartGame={() => session.startGame()}
+          onLeave={handleLeave}
+        />
+        {demoHint}
+      </>
     );
   }
 
-  if (socket.gameState.phase === 'dealing') {
+  if (session.gameState.phase === 'dealing') {
     return (
-      <DealingPhase
-        gameState={socket.gameState}
-        roomCode={socket.roomCode || ''}
-        onStartDealing={() => socket.startDealing()}
-        onDistributeCards={() => socket.distributeCards()}
-        onLeave={handleLeave}
-      />
+      <>
+        <DealingPhase
+          gameState={session.gameState}
+          roomCode={session.roomCode || ''}
+          onStartDealing={() => session.startDealing()}
+          onDistributeCards={() => session.distributeCards()}
+          onLeave={handleLeave}
+        />
+        {demoHint}
+      </>
     );
   }
 
   return (
-    <GameBoard
-      gameState={socket.gameState}
-      roomCode={socket.roomCode || ''}
-      onDrawDeck={() => socket.drawFromDeck()}
-      onPickFromDiscard={() => socket.pickFromDiscard()}
-      onPlaceCard={(cardIds) => socket.placeCard(cardIds)}
-      onShow={() => socket.show()}
-      onContinue={() => socket.nextRound()}
-      onLeave={handleLeave}
-    />
+    <>
+      <GameBoard
+        gameState={session.gameState}
+        roomCode={session.roomCode || ''}
+        onDrawDeck={() => session.drawFromDeck()}
+        onPickFromDiscard={() => session.pickFromDiscard()}
+        onPlaceCard={(cardIds) => session.placeCard(cardIds)}
+        onShow={() => session.show()}
+        onContinue={() => session.nextRound()}
+        onLeave={handleLeave}
+      />
+      {demoHint}
+    </>
   );
 }
 

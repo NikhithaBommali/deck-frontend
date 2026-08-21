@@ -12,6 +12,7 @@ interface LobbyProps {
   onCreateRoom: (name: string, profilePicture: string) => void;
   onJoinRoom: (code: string, name: string, profilePicture: string) => void;
   onPeekRoom: (code: string) => Promise<RoomPeekResult>;
+  onStartDemo: () => void;
   error: string | null;
 }
 
@@ -21,6 +22,7 @@ export function Lobby({
   onCreateRoom,
   onJoinRoom,
   onPeekRoom,
+  onStartDemo,
   error,
 }: LobbyProps) {
   const stored = loadStoredProfile();
@@ -109,7 +111,14 @@ export function Lobby({
         ?
       </button>
 
-      <GameRulesModal open={rulesOpen} onClose={() => setRulesOpen(false)} />
+      <GameRulesModal
+        open={rulesOpen}
+        onClose={() => setRulesOpen(false)}
+        onStartDemo={() => {
+          setRulesOpen(false);
+          onStartDemo();
+        }}
+      />
 
       <div className="absolute inset-0 opacity-5">
         <div

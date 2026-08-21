@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
 import {
   ELIMINATION_SCORE,
-  MAX_SCORE,
   SHOW_THRESHOLD,
 } from '../types/game';
 
 interface GameRulesModalProps {
   open: boolean;
   onClose: () => void;
+  onStartDemo?: () => void;
 }
 
-export function GameRulesModal({ open, onClose }: GameRulesModalProps) {
+export function GameRulesModal({ open, onClose, onStartDemo }: GameRulesModalProps) {
   useEffect(() => {
     if (!open) return;
 
@@ -84,7 +84,12 @@ export function GameRulesModal({ open, onClose }: GameRulesModalProps) {
             <ul className="list-disc pl-5 space-y-1 text-white/75">
               <li>2–6 players join a room. Everyone taps Ready, then the host starts.</li>
               <li>Each player gets <strong className="text-white">7 cards</strong>.</li>
-              <li>One card is flipped open — its rank becomes the <strong className="text-purple-300">zero rank</strong> (worth 0 points) this round.</li>
+              <li>
+                One card is flipped open — every card with the{' '}
+                <strong className="text-white">same value</strong> as that card scores{' '}
+                <strong className="text-purple-300">0 points</strong> this round (the{' '}
+                <strong className="text-purple-300">zero score</strong>).
+              </li>
               <li>Jokers are always worth 0.</li>
             </ul>
           </section>
@@ -94,7 +99,10 @@ export function GameRulesModal({ open, onClose }: GameRulesModalProps) {
             <ul className="list-disc pl-5 space-y-1 text-white/75">
               <li>A = 1 · 2–10 = face value · J, Q, K = 10</li>
               <li>Joker = 0</li>
-              <li>Any card matching the open card&apos;s rank = 0 (marked with a purple badge)</li>
+              <li>
+                Any card matching the open card&apos;s value scores{' '}
+                <strong className="text-white">0</strong> (marked with a purple badge)
+              </li>
             </ul>
           </section>
 
@@ -103,7 +111,7 @@ export function GameRulesModal({ open, onClose }: GameRulesModalProps) {
             <ol className="list-decimal pl-5 space-y-1.5 text-white/75">
               <li>
                 <strong className="text-white">Place</strong> — tap a group of cards with
-                the same rank to discard them together.
+                the same value to discard them together.
               </li>
               <li>
                 <strong className="text-white">Draw</strong> — pick from the deck, or take
@@ -147,14 +155,29 @@ export function GameRulesModal({ open, onClose }: GameRulesModalProps) {
           <section className="rounded-xl bg-black/30 border border-white/10 p-3">
             <h3 className="text-gold-400 font-semibold mb-1.5">Quick tips</h3>
             <ul className="list-disc pl-5 space-y-1 text-white/70 text-xs sm:text-sm">
-              <li>Discard zero-rank and joker cards early — they don&apos;t help your hand score.</li>
+              <li>
+                Discard zero-score and joker cards early — they don&apos;t add to your
+                hand score.
+              </li>
               <li>Watch the score table to see who is close to {ELIMINATION_SCORE}.</li>
-              <li>Only Show when you&apos;re sure no one has a lower hand (reference max ~{MAX_SCORE}).</li>
+              <li>
+                Only Show when you&apos;re sure no one has a lower hand score (yours must
+                be below {SHOW_THRESHOLD}).
+              </li>
             </ul>
           </section>
         </div>
 
-        <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-t border-white/10 bg-black/20">
+        <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-t border-white/10 bg-black/20 space-y-2">
+          {onStartDemo && (
+            <button
+              type="button"
+              onClick={onStartDemo}
+              className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-gold-500/40 transition-colors"
+            >
+              Get Demo
+            </button>
+          )}
           <button
             type="button"
             onClick={onClose}
