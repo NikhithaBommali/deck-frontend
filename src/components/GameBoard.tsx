@@ -15,6 +15,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 interface GameBoardProps {
   gameState: ClientGameState;
   roomCode: string;
+  demoHint?: string | null;
   onDrawDeck: () => void;
   onPickFromDiscard: () => void;
   onPlaceCard: (cardIds: string[]) => void;
@@ -26,6 +27,7 @@ interface GameBoardProps {
 export function GameBoard({
   gameState,
   roomCode,
+  demoHint,
   onDrawDeck,
   onPickFromDiscard,
   onPlaceCard,
@@ -108,7 +110,12 @@ export function GameBoard({
       (a, b) => a.totalScore - b.totalScore
     );
     return (
-      <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
+      <GameLayout
+        gameState={gameState}
+        roomCode={roomCode}
+        demoHint={demoHint}
+        onLeave={onLeave}
+      >
         <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="w-full max-w-md bg-black/40 backdrop-blur rounded-xl sm:rounded-2xl border border-white/10 p-5 sm:p-8 text-center space-y-4 sm:space-y-6">
             <div className="text-5xl sm:text-6xl">🎉</div>
@@ -152,6 +159,7 @@ export function GameBoard({
         gameState={gameState}
         roomCode={roomCode}
         highlightRound={gameState.roundNumber}
+        demoHint={demoHint}
         onLeave={onLeave}
       >
         <div className="flex-1 flex flex-col">
@@ -254,7 +262,12 @@ export function GameBoard({
   }
 
   return (
-    <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
+    <GameLayout
+      gameState={gameState}
+      roomCode={roomCode}
+      demoHint={demoHint}
+      onLeave={onLeave}
+    >
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <header className="px-2 sm:px-4 py-1.5 sm:py-2 bg-black/30 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between gap-2">

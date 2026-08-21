@@ -4,7 +4,6 @@ import { Lobby } from './components/Lobby';
 import { WaitingRoom } from './components/WaitingRoom';
 import { DealingPhase } from './components/DealingPhase';
 import { GameBoard } from './components/GameBoard';
-import { DemoHintBar } from './components/DemoHintBar';
 import { getInviteCodeFromUrl } from './utils/roomInvite';
 
 function ReconnectingScreen() {
@@ -26,6 +25,9 @@ function ReconnectingScreen() {
 function App() {
   const session = useGameSession();
   const inviteCode = useMemo(() => getInviteCodeFromUrl(), []);
+
+  const demoHint =
+    session.isDemo && session.demoHint ? session.demoHint : null;
 
   const handleLeave = async () => {
     if (session.isDemo || session.gameState?.phase === 'finished') {
@@ -51,11 +53,6 @@ function App() {
     return () => clearTimeout(timer);
   }, [session.gameState?.phase, session.leaveRoom]);
 
-  const demoHint =
-    session.isDemo && session.demoHint ? (
-      <DemoHintBar hint={session.demoHint} />
-    ) : null;
-
   if (session.reconnecting && !session.gameState) {
     return <ReconnectingScreen />;
   }
@@ -76,48 +73,42 @@ function App() {
 
   if (session.gameState.phase === 'waiting') {
     return (
-      <>
-        <WaitingRoom
-          gameState={session.gameState}
-          roomCode={session.roomCode || ''}
-          onSetReady={(ready) => session.setReady(ready)}
-          onStartGame={() => session.startGame()}
-          onLeave={handleLeave}
-        />
-        {demoHint}
-      </>
+      <WaitingRoom
+        gameState={session.gameState}
+        roomCode={session.roomCode || ''}
+        demoHint={demoHint}
+        onSetReady={(ready) => session.setReady(ready)}
+        onStartGame={() => session.startGame()}
+        onLeave={handleLeave}
+      />
     );
   }
 
   if (session.gameState.phase === 'dealing') {
     return (
-      <>
-        <DealingPhase
-          gameState={session.gameState}
-          roomCode={session.roomCode || ''}
-          onStartDealing={() => session.startDealing()}
-          onDistributeCards={() => session.distributeCards()}
-          onLeave={handleLeave}
-        />
-        {demoHint}
-      </>
+      <DealingPhase
+        gameState={session.gameState}
+        roomCode={session.roomCode || ''}
+        demoHint={demoHint}
+        onStartDealing={() => session.startDealing()}
+        onDistributeCards={() => session.distributeCards()}
+        onLeave={handleLeave}
+      />
     );
   }
 
   return (
-    <>
-      <GameBoard
-        gameState={session.gameState}
-        roomCode={session.roomCode || ''}
-        onDrawDeck={() => session.drawFromDeck()}
-        onPickFromDiscard={() => session.pickFromDiscard()}
-        onPlaceCard={(cardIds) => session.placeCard(cardIds)}
-        onShow={() => session.show()}
-        onContinue={() => session.nextRound()}
-        onLeave={handleLeave}
-      />
-      {demoHint}
-    </>
+    <GameBoard
+      gameState={session.gameState}
+      roomCode={session.roomCode || ''}
+      demoHint={demoHint}
+      onDrawDeck={() => session.drawFromDeck()}
+      onPickFromDiscard={() => session.pickFromDiscard()}
+      onPlaceCard={(cardIds) => session.placeCard(cardIds)}
+      onShow={() => session.show()}
+      onContinue={() => session.nextRound()}
+      onLeave={handleLeave}
+    />
   );
 }
 

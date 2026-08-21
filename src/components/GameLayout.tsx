@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { ClientGameState } from '../types/game';
 import { useSidebarWidth } from '../hooks/useSidebarWidth';
 import { CollapsibleScorePanel } from './CollapsibleScorePanel';
+import { DemoHintBar } from './DemoHintBar';
 import { ScoreTable } from './ScoreTable';
 import { RoomInviteShare } from './RoomInviteShare';
 
@@ -10,6 +11,7 @@ interface GameLayoutProps {
   roomCode?: string;
   children: ReactNode;
   highlightRound?: number | null;
+  demoHint?: string | null;
   onLeave?: () => void;
 }
 
@@ -18,6 +20,7 @@ export function GameLayout({
   roomCode,
   children,
   highlightRound,
+  demoHint,
   onLeave,
 }: GameLayoutProps) {
   const host = gameState.players.find((p) => p.id === gameState.hostId);
@@ -49,6 +52,8 @@ export function GameLayout({
           </button>
         </div>
       )}
+
+      {demoHint && <DemoHintBar hint={demoHint} />}
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <aside

@@ -8,6 +8,7 @@ import { ClientGameState, getScoreColorClass, groupHandByRank } from '../types/g
 interface DealingPhaseProps {
   gameState: ClientGameState;
   roomCode: string;
+  demoHint?: string | null;
   onStartDealing: () => void;
   onDistributeCards: () => void;
   onLeave: () => void;
@@ -16,6 +17,7 @@ interface DealingPhaseProps {
 export function DealingPhase({
   gameState,
   roomCode,
+  demoHint,
   onStartDealing,
   onDistributeCards,
   onLeave,
@@ -40,7 +42,12 @@ export function DealingPhase({
   const isCompact = useMediaQuery('(max-width: 640px)');
 
   return (
-    <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
+    <GameLayout
+      gameState={gameState}
+      roomCode={roomCode}
+      demoHint={demoHint}
+      onLeave={onLeave}
+    >
       <div className="flex flex-col flex-1 min-h-0">
       <header className="flex-shrink-0 px-3 sm:px-4 py-2 sm:py-3 bg-black/30 border-b border-white/10">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-2">

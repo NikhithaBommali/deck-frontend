@@ -2,20 +2,40 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadStoredProfile } from '../api/profile';
 import { ClientGameState } from '../types/game';
 import {
-  DEMO_DISCARD_TOP,
-  DEMO_DRAW_CARD,
+  DEMO_DISCARD_START,
+  DEMO_DRAW_ZERO_R1,
+  DEMO_DRAW_ZERO_R2,
   DEMO_IDS,
-  DEMO_PLAYER_HAND,
+  DEMO_ROUND1_SCORES,
+  DEMO_ROUND2_SCORES,
   DEMO_ROOM_CODE,
   DemoRuntime,
   createInitialDemoRuntime,
   getDealtHandAtStep,
+  getDemoHandForRound,
+  getDemoOpenForRound,
+  getFiveIds,
+  getJokerIds,
   getLastDealtPlayerId,
+  getSevenIds,
   toDemoClientState,
 } from '../demo/demoScenario';
 import { RoomPeekResult } from '../types/room';
 
-const DEAL_INTERVAL_MS = 480;
+const DEAL_INTERVAL_MS = 420;
+const BOT_TURN_MS = 1800;
+
+function appendRoundScore(
+  existing: number[],
+  playerId: string,
+  roundNumber: number
+): number[] {
+  const score =
+    roundNumber >= 2
+      ? DEMO_ROUND2_SCORES[playerId as keyof typeof DEMO_ROUND2_SCORES]
+      : DEMO_ROUND1_SCORES[playerId as keyof typeof DEMO_ROUND1_SCORES];
+  return [...existing, score];
+}
 
 export function useDemoGame() {
   const [isActive, setIsActive] = useState(false);
@@ -23,6 +43,7 @@ export function useDemoGame() {
   const [demoHint, setDemoHint] = useState<string | null>(null);
   const runtimeRef = useRef<DemoRuntime | null>(null);
   const dealingTimerRef = useRef<number | null>(null);
+  const botTimerRef = useRef<number | null>(null);
 
   const syncState = useCallback((runtime: DemoRuntime) => {
     runtimeRef.current = runtime;
@@ -37,27 +58,93 @@ export function useDemoGame() {
     }
   }, []);
 
+  const clearBotTimer = useCallback(() => {
+    if (botTimerRef.current !== null) {
+      window.clearTimeout(botTimerRef.current);
+      botTimerRef.current = null;
+    }
+  }, []);
+
+  const clearAllTimers = useCallback(() => {
+    clearDealingTimer();
+    clearBotTimer();
+  }, [clearDealingTimer, clearBotTimer]);
+
+  const scheduleBotTurns = useCallback(() => {
+    clearBotTimer();
+      botTimerRef.current = window.setTimeout(() => {
+        const current = runtimeRef.current;
+        if (!current || current.phase !== 'playing') return;
+
+        syncState({
+          ...current,
+          playingStep: 'bot_sam',
+          isMyTurn: false,
+          hint: "Sam's turn — players take turns placing cards and drawing.",
+        });
+
+        botTimerRef.current = window.setTimeout(() => {
+          const latest = runtimeRef.current;
+          if (!latest || latest.phase !== 'playing') return;
+
+          const isRound2 = latest.roundNumber >= 2;
+          syncState({
+            ...latest,
+            playingStep: isRound2 ? 'place_fives' : 'place_sevens',
+            isMyTurn: true,
+            hint: isRound2
+              ? 'Your turn! The open card is 5 — all 5s score 0. Tap the group of 5s to Place them.'
+              : 'Your turn! The open card is 7 — all 7s score 0 (purple badge). Tap the group of 7s to Place them.',
+          });
+        }, BOT_TURN_MS);
+    }, BOT_TURN_MS);
+  }, [clearBotTimer, syncState]);
+
+  const startPlayingPhase = useCallback(
+    (runtime: DemoRuntime) => {
+      const hand = getDemoHandForRound(runtime.roundNumber);
+      syncState({
+        ...runtime,
+        phase: 'playing',
+        cardsRevealed: true,
+        myHand: hand,
+        isMyTurn: false,
+        playingStep: 'bot_alex',
+        turnHasPlaced: false,
+        turnHasDrawn: false,
+        placedOnDiscard: [],
+        discardTop: DEMO_DISCARD_START,
+        hint:
+          runtime.roundNumber >= 2
+            ? 'Round 2! Alex is playing first — watch how turns rotate around the table.'
+            : 'Round 1 begins! Alex plays first — each player takes a turn to Place and Draw.',
+      });
+      scheduleBotTurns();
+    },
+    [scheduleBotTurns, syncState]
+  );
+
   const startDemo = useCallback(
     (playerName?: string) => {
-      clearDealingTimer();
+      clearAllTimers();
       const stored = loadStoredProfile();
       const name = playerName?.trim() || stored.name.trim() || 'You';
       const runtime = createInitialDemoRuntime(name);
       setIsActive(true);
       syncState(runtime);
     },
-    [clearDealingTimer, syncState]
+    [clearAllTimers, syncState]
   );
 
   const leaveRoom = useCallback(async () => {
-    clearDealingTimer();
+    clearAllTimers();
     runtimeRef.current = null;
     setIsActive(false);
     setGameState(null);
     setDemoHint(null);
-  }, [clearDealingTimer]);
+  }, [clearAllTimers]);
 
-  useEffect(() => () => clearDealingTimer(), [clearDealingTimer]);
+  useEffect(() => clearAllTimers(), [clearAllTimers]);
 
   const runDealingStep = useCallback(() => {
     const runtime = runtimeRef.current;
@@ -68,7 +155,7 @@ export function useDemoGame() {
       clearDealingTimer();
       syncState({
         ...runtime,
-        hint: 'All cards dealt! Tap Start Round to begin playing.',
+        hint: 'All 7 cards dealt to each player! Tap Start Round when you are ready.',
       });
       return;
     }
@@ -77,12 +164,12 @@ export function useDemoGame() {
     syncState({
       ...runtime,
       dealingStep: nextStep,
-      myHand: getDealtHandAtStep(nextStep),
+      myHand: getDealtHandAtStep(nextStep, runtime.roundNumber),
       lastDealtPlayerId: getLastDealtPlayerId(nextStep),
       hint:
         nextStep >= totalSteps
-          ? 'All cards dealt! Tap Start Round to begin playing.'
-          : 'Watch the cards fly from the deck to each player...',
+          ? 'All 7 cards dealt to each player! Tap Start Round when you are ready.'
+          : `Dealing card ${nextStep} of ${totalSteps} — cards fly from the deck to each seat.`,
     });
   }, [clearDealingTimer, syncState]);
 
@@ -111,8 +198,8 @@ export function useDemoGame() {
         ...runtime,
         playerReady: ready,
         hint: ready
-          ? 'Great! Tap Play to start dealing.'
-          : 'Tap Ready Up, then Play to start the demo game.',
+          ? 'You are ready! Alex and Sam are too. Tap Play to start Round 1.'
+          : 'Welcome! Tap Ready Up so everyone knows you are set to play.',
       });
     },
     [syncState]
@@ -126,10 +213,11 @@ export function useDemoGame() {
       ...runtime,
       phase: 'dealing',
       roundNumber: 1,
+      openCard: getDemoOpenForRound(1),
       dealingStep: 0,
       myHand: [],
       cardsRevealed: false,
-      hint: 'Tap Distribute Cards to deal 7 cards to each player.',
+      hint: 'Round 1 — the open card will be 7 (zero score). Tap Distribute Cards to deal.',
     });
   }, [syncState]);
 
@@ -140,7 +228,7 @@ export function useDemoGame() {
     clearDealingTimer();
     syncState({
       ...runtime,
-      hint: 'Watch the cards fly from the deck to each player...',
+      hint: 'Dealing 7 cards to each player — watch them arrive one by one.',
     });
 
     dealingTimerRef.current = window.setInterval(runDealingStep, DEAL_INTERVAL_MS);
@@ -151,24 +239,14 @@ export function useDemoGame() {
     if (!runtime || runtime.phase !== 'dealing' || runtime.dealingStep < 21) return;
 
     clearDealingTimer();
-    syncState({
-      ...runtime,
-      phase: 'playing',
-      cardsRevealed: true,
-      myHand: [...DEMO_PLAYER_HAND],
-      turnHasPlaced: false,
-      turnHasDrawn: false,
-      placedOnDiscard: [],
-      discardTop: DEMO_DISCARD_TOP,
-      hint:
-        'Your hand score is 3 — the lowest at the table! Try placing your 7s (zero cards), or tap Show to win the round.',
-    });
-  }, [clearDealingTimer, syncState]);
+    startPlayingPhase(runtime);
+  }, [clearDealingTimer, startPlayingPhase]);
 
   const placeCard = useCallback(
     async (cardIds: string[]) => {
       const runtime = runtimeRef.current;
-      if (!runtime || runtime.phase !== 'playing' || runtime.turnHasPlaced) return;
+      if (!runtime || runtime.phase !== 'playing' || !runtime.isMyTurn) return;
+      if (runtime.turnHasPlaced) return;
 
       const placing = runtime.myHand.filter((c) => cardIds.includes(c.id));
       if (placing.length === 0) return;
@@ -176,51 +254,165 @@ export function useDemoGame() {
       const firstRank = placing[0].rank;
       if (!placing.every((c) => c.rank === firstRank)) return;
 
+      if (runtime.playingStep === 'place_sevens') {
+        const sevenIds = getSevenIds(runtime.myHand);
+        if (!cardIds.every((id) => sevenIds.includes(id)) || cardIds.length !== sevenIds.length) {
+          return;
+        }
+      } else if (runtime.playingStep === 'place_joker') {
+        const jokerIds = getJokerIds(runtime.myHand);
+        if (cardIds.length !== 1 || !jokerIds.includes(cardIds[0])) return;
+      } else if (runtime.playingStep === 'place_fives') {
+        const fiveIds = getFiveIds(runtime.myHand);
+        if (!cardIds.every((id) => fiveIds.includes(id)) || cardIds.length !== fiveIds.length) {
+          return;
+        }
+      } else {
+        return;
+      }
+
       const remaining = runtime.myHand.filter((c) => !cardIds.includes(c.id));
       const newDiscard = placing[placing.length - 1];
-      const matchedDiscard = newDiscard.rank === runtime.discardTop?.rank;
 
-      syncState({
-        ...runtime,
-        myHand: remaining,
-        placedOnDiscard: placing,
-        turnHasPlaced: true,
-        turnHasDrawn: matchedDiscard,
-        discardTop: newDiscard,
-        hint: matchedDiscard
-          ? 'Nice! That matched the discard — no draw needed. Tap Show to finish the round with 0 points!'
-          : 'Nice! Those zero cards are off your hand. Now draw one card from the deck.',
-      });
+      if (runtime.playingStep === 'place_sevens') {
+        syncState({
+          ...runtime,
+          myHand: remaining,
+          placedOnDiscard: placing,
+          turnHasPlaced: true,
+          turnHasDrawn: false,
+          discardTop: newDiscard,
+          playingStep: 'draw_after_sevens',
+          hint: 'Great! Zero-score cards cleared. Now tap the deck to Draw one card — every turn ends with a draw.',
+        });
+        return;
+      }
+
+      if (runtime.playingStep === 'place_joker') {
+        syncState({
+          ...runtime,
+          myHand: remaining,
+          placedOnDiscard: placing,
+          turnHasPlaced: true,
+          turnHasDrawn: false,
+          discardTop: newDiscard,
+          playingStep: 'draw_after_joker',
+          hint: 'Joker placed! Draw one more card from the deck to complete your turn.',
+        });
+        return;
+      }
+
+      if (runtime.playingStep === 'place_fives') {
+        syncState({
+          ...runtime,
+          myHand: remaining,
+          placedOnDiscard: placing,
+          turnHasPlaced: true,
+          turnHasDrawn: false,
+          discardTop: newDiscard,
+          playingStep: 'draw_round2',
+          hint: 'Nice! Now draw from the deck, then Show to finish Round 2.',
+        });
+      }
     },
     [syncState]
   );
 
   const drawFromDeck = useCallback(async () => {
     const runtime = runtimeRef.current;
-    if (!runtime || runtime.phase !== 'playing') return;
-    if (!runtime.turnHasPlaced || runtime.turnHasDrawn) return;
+    if (!runtime || runtime.phase !== 'playing' || !runtime.isMyTurn) return;
+    if (!runtime.turnHasPlaced) return;
 
-    syncState({
-      ...runtime,
-      myHand: [...runtime.myHand, DEMO_DRAW_CARD],
-      turnHasPlaced: false,
-      turnHasDrawn: false,
-      placedOnDiscard: [],
-      hint: 'Perfect! Tap Show to end the round with 0 points — you have the lowest score.',
-    });
+    if (runtime.playingStep === 'draw_after_sevens') {
+      syncState({
+        ...runtime,
+        myHand: [...runtime.myHand, DEMO_DRAW_ZERO_R1],
+        turnHasPlaced: false,
+        turnHasDrawn: false,
+        placedOnDiscard: [],
+        playingStep: 'place_joker',
+        hint: 'You drew a 7 — still 0 points! Tap the Joker to Place it (jokers always score 0).',
+      });
+      return;
+    }
+
+    if (runtime.playingStep === 'draw_after_joker') {
+      syncState({
+        ...runtime,
+        myHand: [...runtime.myHand, DEMO_DRAW_ZERO_R1],
+        turnHasPlaced: false,
+        turnHasDrawn: false,
+        placedOnDiscard: [],
+        playingStep: 'show_round',
+        hint: 'Your hand score is 3 — the lowest at the table! Tap Show to end the round with 0 points.',
+      });
+      return;
+    }
+
+    if (runtime.playingStep === 'draw_round2') {
+      syncState({
+        ...runtime,
+        myHand: [...runtime.myHand, DEMO_DRAW_ZERO_R2],
+        turnHasPlaced: false,
+        turnHasDrawn: false,
+        placedOnDiscard: [],
+        playingStep: 'show_round2',
+        hint: 'Hand score is 3 again — lowest at the table. Tap Show to win Round 2!',
+      });
+    }
   }, [syncState]);
 
   const pickFromDiscard = useCallback(async () => {}, []);
 
+  const applyRoundEnd = useCallback(
+    (runtime: DemoRuntime) => {
+      const roundNumber = runtime.roundNumber;
+      const roundScoreMap =
+        roundNumber >= 2 ? DEMO_ROUND2_SCORES : DEMO_ROUND1_SCORES;
+
+      const playerTotals = {
+        [DEMO_IDS.player]:
+          (runtime.playerTotals[DEMO_IDS.player] ?? 0) + roundScoreMap[DEMO_IDS.player],
+        [DEMO_IDS.alex]:
+          (runtime.playerTotals[DEMO_IDS.alex] ?? 0) + roundScoreMap[DEMO_IDS.alex],
+        [DEMO_IDS.sam]:
+          (runtime.playerTotals[DEMO_IDS.sam] ?? 0) + roundScoreMap[DEMO_IDS.sam],
+      };
+
+      return {
+        playerTotals,
+        roundScores: {
+          [DEMO_IDS.player]: appendRoundScore(
+            runtime.roundScores[DEMO_IDS.player] ?? [],
+            DEMO_IDS.player,
+            roundNumber
+          ),
+          [DEMO_IDS.alex]: appendRoundScore(
+            runtime.roundScores[DEMO_IDS.alex] ?? [],
+            DEMO_IDS.alex,
+            roundNumber
+          ),
+          [DEMO_IDS.sam]: appendRoundScore(
+            runtime.roundScores[DEMO_IDS.sam] ?? [],
+            DEMO_IDS.sam,
+            roundNumber
+          ),
+        },
+      };
+    },
+    []
+  );
+
   const show = useCallback(async () => {
     const runtime = runtimeRef.current;
-    if (!runtime || runtime.phase !== 'playing' || runtime.turnHasPlaced) return;
+    if (!runtime || runtime.phase !== 'playing' || !runtime.isMyTurn) return;
+    if (runtime.turnHasPlaced) return;
+    if (runtime.playingStep !== 'show_round' && runtime.playingStep !== 'show_round2') {
+      return;
+    }
 
-    const roundScores = {
-      [DEMO_IDS.player]: 0,
-      [DEMO_IDS.alex]: 28,
-      [DEMO_IDS.sam]: 31,
-    };
+    clearBotTimer();
+    const { playerTotals, roundScores } = applyRoundEnd(runtime);
 
     syncState({
       ...runtime,
@@ -228,29 +420,52 @@ export function useDemoGame() {
       winnerId: DEMO_IDS.player,
       showPlayerId: DEMO_IDS.player,
       showPenalty: false,
-      playerTotals: { ...roundScores },
-      roundScores: {
-        [DEMO_IDS.player]: [0],
-        [DEMO_IDS.alex]: [28],
-        [DEMO_IDS.sam]: [31],
-      },
+      playerTotals,
+      roundScores,
       hasShown: {
         ...runtime.hasShown,
         [DEMO_IDS.player]: true,
       },
-      hint: 'You showed with the lowest score — 0 points this round! Continue to see the final results.',
+      playingStep: 'idle',
+      hint:
+        runtime.roundNumber >= 2
+          ? 'Round 2 complete! Check the score table — lowest total wins the game.'
+          : 'Round 1 complete with 0 points! Tap Continue to deal Round 2.',
     });
-  }, [syncState]);
+  }, [applyRoundEnd, clearBotTimer, syncState]);
 
   const nextRound = useCallback(async () => {
     const runtime = runtimeRef.current;
     if (!runtime || runtime.phase !== 'round-end') return;
 
+    if (runtime.roundNumber >= 2) {
+      syncState({
+        ...runtime,
+        phase: 'finished',
+        winnerId: DEMO_IDS.player,
+        hint: 'Demo complete — you win with the lowest total score!',
+      });
+      return;
+    }
+
     syncState({
       ...runtime,
-      phase: 'finished',
-      winnerId: DEMO_IDS.player,
-      hint: 'Demo complete — you win with the lowest total score!',
+      phase: 'dealing',
+      roundNumber: 2,
+      openCard: getDemoOpenForRound(2),
+      dealingStep: 0,
+      myHand: [],
+      cardsRevealed: false,
+      isMyTurn: false,
+      playingStep: 'idle',
+      turnHasPlaced: false,
+      turnHasDrawn: false,
+      placedOnDiscard: [],
+      discardTop: DEMO_DISCARD_START,
+      winnerId: null,
+      showPlayerId: null,
+      showPenalty: false,
+      hint: 'Round 2 — open card is now 5. Tap Distribute Cards to deal again.',
     });
   }, [syncState]);
 
