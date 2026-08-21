@@ -6,9 +6,16 @@ import { ResizeHandle } from './ResizeHandle';
 interface ScoreTableProps {
   gameState: ClientGameState;
   highlightRound?: number | null;
+  showHeader?: boolean;
+  embedded?: boolean;
 }
 
-export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
+export function ScoreTable({
+  gameState,
+  highlightRound,
+  showHeader = true,
+  embedded = false,
+}: ScoreTableProps) {
   const { layout, resizeColumn, resetLayout } = useScoreTableLayout();
   const sorted = [...gameState.players].sort((a, b) => a.seatIndex - b.seatIndex);
   const maxRounds = Math.max(
@@ -33,30 +40,38 @@ export function ScoreTable({ gameState, highlightRound }: ScoreTableProps) {
   );
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10 overflow-hidden h-full flex flex-col">
-      <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-white/10 bg-black/20 flex-shrink-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 className="font-display text-gold-400 font-bold text-base sm:text-lg">
-              Score Table
-            </h2>
-            <p className="text-white/40 text-[10px] sm:text-xs mt-0.5">
-              Out at {gameState.eliminationScore}+ · Round {gameState.roundNumber}
-            </p>
+    <div
+      className={
+        embedded
+          ? 'h-full flex flex-col overflow-hidden'
+          : 'bg-black/40 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10 overflow-hidden h-full flex flex-col'
+      }
+    >
+      {showHeader && (
+        <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-white/10 bg-black/20 flex-shrink-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h2 className="font-display text-gold-400 font-bold text-base sm:text-lg">
+                Score Table
+              </h2>
+              <p className="text-white/40 text-[10px] sm:text-xs mt-0.5">
+                Out at {gameState.eliminationScore}+ · Round {gameState.roundNumber}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={resetLayout}
+              className="hidden sm:inline text-[10px] text-white/40 hover:text-gold-300 transition-colors whitespace-nowrap pt-0.5"
+              title="Reset column and row sizes"
+            >
+              Reset sizes
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={resetLayout}
-            className="hidden sm:inline text-[10px] text-white/40 hover:text-gold-300 transition-colors whitespace-nowrap pt-0.5"
-            title="Reset column and row sizes"
-          >
-            Reset sizes
-          </button>
+          <p className="hidden sm:block text-white/30 text-[10px] mt-1.5">
+            Rounds down · Players across · Drag edges to resize
+          </p>
         </div>
-        <p className="hidden sm:block text-white/30 text-[10px] mt-1.5">
-          Rounds down · Players across · Drag edges to resize
-        </p>
-      </div>
+      )}
 
       <div className="overflow-auto flex-1 min-h-0">
         <table

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { ClientGameState } from '../types/game';
 import { useSidebarWidth } from '../hooks/useSidebarWidth';
+import { CollapsibleScorePanel } from './CollapsibleScorePanel';
 import { ScoreTable } from './ScoreTable';
 import { RoomInviteShare } from './RoomInviteShare';
 
@@ -26,10 +27,6 @@ export function GameLayout({
   // Waiting room already uses the main area; duplicating score table + invite on mobile causes overlap.
   const showMobileScorePanel =
     gameState.phase !== 'waiting' && gameState.phase !== 'dealing';
-  const mobileScorePanelHeight =
-    gameState.phase === 'round-end' || gameState.phase === 'finished'
-      ? 'min(30vh,220px)'
-      : 'min(28vh,200px)';
 
   return (
     <div className="h-dvh min-h-0 overflow-hidden bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex flex-col">
@@ -82,12 +79,10 @@ export function GameLayout({
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
           {showMobileScorePanel && (
             <div className="lg:hidden flex-shrink-0 px-2 sm:px-3 pt-2 pb-1">
-              <div
-                className="overflow-hidden flex flex-col"
-                style={{ height: mobileScorePanelHeight, minHeight: 100 }}
-              >
-                <ScoreTable gameState={gameState} highlightRound={highlightRound} />
-              </div>
+              <CollapsibleScorePanel
+                gameState={gameState}
+                highlightRound={highlightRound}
+              />
             </div>
           )}
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col lg:overflow-hidden">
