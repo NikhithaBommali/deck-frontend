@@ -78,14 +78,11 @@ export function CollapsibleScorePanel({
         <ChevronIcon expanded={expanded} />
       </button>
 
-      <div
-        id="mobile-score-table"
-        className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
-        style={{ maxHeight: expanded ? expandedMaxHeight : '0px' }}
-      >
+      {expanded && (
         <div
+          id="mobile-score-table"
           className="border-t border-white/10 overflow-hidden flex flex-col"
-          style={{ height: expandedMaxHeight }}
+          style={{ height: expandedMaxHeight, maxHeight: expandedMaxHeight }}
         >
           <ScoreTable
             gameState={gameState}
@@ -94,7 +91,7 @@ export function CollapsibleScorePanel({
             embedded
           />
         </div>
-      </div>
+      )}
     </div>
   );
 }

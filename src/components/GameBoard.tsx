@@ -276,9 +276,9 @@ export function GameBoard({
   return (
     <GameLayout gameState={gameState} roomCode={roomCode} onLeave={onLeave}>
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <header className="px-2 sm:px-4 py-2 bg-black/30 border-b border-white/10 flex-shrink-0">
-          <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap min-w-0">
+        <header className="px-2 sm:px-4 py-1.5 sm:py-2 bg-black/30 border-b border-white/10 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap min-w-0 flex-1">
               <span className="font-display text-base sm:text-xl text-gold-400 font-bold">
                 Deck Score
               </span>
@@ -286,13 +286,13 @@ export function GameBoard({
                 Round {gameState.roundNumber} ·{' '}
                 <span className="font-mono text-gold-400">{roomCode}</span>
               </span>
-              <span className="text-white/40 text-xs">
+              <span className="text-white/40 text-xs hidden xs:inline">
                 Total:{' '}
                 <span className="text-gold-400 font-bold">{gameState.myTotalScore}</span>
               </span>
             </div>
             <div
-              className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap ${
+              className={`flex-shrink-0 px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap ${
                 gameState.isMyTurn
                   ? 'bg-green-500/30 text-green-300 border border-green-500/40 animate-pulse'
                   : 'bg-white/10 text-white/60'
@@ -303,13 +303,14 @@ export function GameBoard({
                 : `${currentPlayer?.name ?? 'Opponent'}'s Turn`}
             </div>
           </div>
-          <div className="hidden sm:block">
+          <div className="hidden sm:block mt-2">
             <ScoreBar gameState={gameState} />
           </div>
         </header>
 
+        {/* Turn hints on desktop only — mobile uses header pill + TURN badge on table seats */}
         <div
-          className={`px-2 sm:px-4 py-1.5 sm:py-2 text-center text-xs sm:text-sm font-medium border-b flex-shrink-0 ${
+          className={`hidden sm:block px-4 py-2 text-center text-sm font-medium border-b flex-shrink-0 ${
             gameState.isMyTurn
               ? 'bg-green-600/30 border-green-500/40 text-green-100'
               : 'bg-amber-600/20 border-amber-500/30 text-amber-100'
@@ -319,18 +320,16 @@ export function GameBoard({
             {gameState.isMyTurn ? (
               <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
             ) : (
-              <span className="text-base sm:text-lg flex-shrink-0">⏳</span>
+              <span className="text-lg flex-shrink-0">⏳</span>
             )}
-            <span className="line-clamp-2 sm:line-clamp-none text-left sm:text-center">
+            <span>
               {gameState.isMyTurn ? (
                 <strong>YOUR TURN{myName ? ` (${myName})` : ''}</strong>
               ) : (
                 <strong>{currentPlayer?.name ?? 'Opponent'}&apos;s turn</strong>
               )}
-              <span className="hidden xs:inline"> — </span>
-              <span className="block sm:inline text-[11px] sm:text-sm opacity-90">
-                {turnMessage}
-              </span>
+              {' — '}
+              {turnMessage}
             </span>
           </div>
         </div>
@@ -379,6 +378,12 @@ export function GameBoard({
                   </span>
                 </div>
               </div>
+
+              {isCompact && gameState.isMyTurn && (
+                <p className="text-green-300/90 text-[11px] leading-snug border-t border-white/10 pt-2">
+                  {turnMessage}
+                </p>
+              )}
 
               <div className="flex flex-wrap gap-2 sm:gap-3 min-h-[4rem] sm:min-h-[5rem] overflow-x-auto pb-1">
                 {rankGroups.map((group) => {
