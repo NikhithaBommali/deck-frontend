@@ -37,33 +37,11 @@ export function GameBoard({
   const isHost = gameState.hostId === gameState.myId;
   const winner = gameState.players.find((p) => p.id === gameState.winnerId);
   const showPlayer = gameState.players.find((p) => p.id === gameState.showPlayerId);
-  const currentPlayer = gameState.players.find(
-    (p) => p.id === gameState.currentTurnPlayerId
-  );
   const rankGroups = groupHandByRank(gameState.myHand);
   const me = gameState.players.find((p) => p.id === gameState.myId);
   const eliminatedThisRound = gameState.players.filter(
     (p) => p.isEliminated && p.totalScore >= gameState.eliminationScore
   );
-
-  const turnMessage = (() => {
-    if (me?.isEliminated) {
-      return 'You have been eliminated — spectating...';
-    }
-    if (!gameState.isMyTurn) {
-      return `Waiting for ${currentPlayer?.name ?? 'opponent'} to play...`;
-    }
-    if (gameState.mustDrawAfterPlace) {
-      if (gameState.canPickFromDiscard && gameState.pickableDiscardCard) {
-        return "Cards placed! Tap the previous player's discard OR draw from the deck.";
-      }
-      return 'Cards placed! Draw from the deck.';
-    }
-    if (gameState.hasPlacedThisTurn && gameState.hasDrawnThisTurn) {
-      return 'Turn complete — waiting for next player...';
-    }
-    return 'Click a card group to place (same ranks go together). Then draw unless you matched discard top.';
-  })();
 
   const canPlace =
     gameState.isMyTurn && !gameState.hasPlacedThisTurn && !me?.isEliminated;
@@ -159,6 +137,9 @@ export function GameBoard({
                 </div>
               ))}
             </div>
+            <p className="text-white/40 text-xs pt-2">
+              Returning to home in a moment...
+            </p>
           </div>
         </div>
       </GameLayout>
@@ -296,7 +277,7 @@ export function GameBoard({
           </div>
         </header>
 
-        <div className="flex-1 p-2 sm:p-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 flex flex-col">
+        <div className="flex-1 p-2 sm:p-4 pt-2 sm:pt-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 flex flex-col">
           <div className="flex-shrink-0 flex justify-center w-full">
             <RoundTable
               gameState={gameState}
@@ -340,12 +321,6 @@ export function GameBoard({
                   </span>
                 </div>
               </div>
-
-              {gameState.isMyTurn && (
-                <p className="text-green-300/90 text-[11px] sm:text-xs leading-snug border-t border-white/10 pt-2">
-                  {turnMessage}
-                </p>
-              )}
 
               <div className="flex flex-wrap gap-2 sm:gap-3 min-h-[4rem] sm:min-h-[5rem] overflow-x-auto pb-1">
                 {rankGroups.map((group) => {

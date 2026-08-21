@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { saveProfile, storeProfile, loadStoredProfile } from '../api/profile';
-import { MAX_SCORE } from '../types/game';
 import { RoomPeekResult } from '../types/room';
 import { clearInviteFromUrl, normalizeRoomCode } from '../utils/roomInvite';
 import { ProfileUpload } from './ProfileUpload';
 import { RoomJoinBanner } from './RoomJoinBanner';
+import { GameRulesModal } from './GameRulesModal';
 
 interface LobbyProps {
   connected: boolean;
@@ -33,6 +33,7 @@ export function Lobby({
   const [saving, setSaving] = useState(false);
   const [roomPeek, setRoomPeek] = useState<RoomPeekResult | null>(null);
   const [peekLoading, setPeekLoading] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   useEffect(() => {
     if (initialJoinCode) {
@@ -97,7 +98,19 @@ export function Lobby({
     mode === 'join' && (peekLoading || !!roomPeek || joinCode.length === 6);
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex items-center justify-center p-4 relative">
+      <button
+        type="button"
+        onClick={() => setRulesOpen(true)}
+        className="fixed top-4 right-4 z-40 w-10 h-10 rounded-full bg-black/40 hover:bg-black/55 border border-gold-500/40 text-gold-400 font-bold text-lg shadow-lg backdrop-blur-sm transition-colors flex items-center justify-center"
+        aria-label="How to play"
+        title="How to play"
+      >
+        ?
+      </button>
+
+      <GameRulesModal open={rulesOpen} onClose={() => setRulesOpen(false)} />
+
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
@@ -116,8 +129,16 @@ export function Lobby({
             </h1>
           </div>
           <p className="text-white/60 text-sm max-w-sm mx-auto">
-            Reduce your score (max {MAX_SCORE}). Place cards, draw from deck, and Show
-            when your score is below 4.
+            Multiplayer card game — lowest total score wins. Tap{' '}
+            <button
+              type="button"
+              onClick={() => setRulesOpen(true)}
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gold-500/20 border border-gold-500/40 text-gold-400 text-xs font-bold align-middle hover:bg-gold-500/30 transition-colors"
+              aria-label="How to play"
+            >
+              ?
+            </button>{' '}
+            for full rules.
           </p>
         </div>
 
@@ -228,12 +249,6 @@ export function Lobby({
               </div>
             </form>
           )}
-        </div>
-
-        <div className="mt-6 text-center text-white/40 text-xs space-y-1">
-          <p>Max score: {MAX_SCORE} (hand can start higher) · Show when score &lt; 4</p>
-          <p>Place a card → draw (unless you match discard top)</p>
-          <p>Show: lowest score wins (0 pts). Wrong show = sum of others&apos; scores</p>
         </div>
       </div>
     </div>

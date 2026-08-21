@@ -62,9 +62,11 @@ export function DealingPhase({
         </div>
       </header>
 
-      <div className="hidden sm:block flex-shrink-0 px-4 py-2 bg-black/20 border-b border-white/5">
-        <ScoreBar gameState={gameState} showScores={gameState.isDealingComplete} />
-      </div>
+      {gameState.isDealingComplete && (
+        <div className="hidden sm:block flex-shrink-0 px-4 py-2 bg-black/20 border-b border-white/5">
+          <ScoreBar gameState={gameState} showScores />
+        </div>
+      )}
 
       {dealingStarted && (
         <div className="px-4 py-2 bg-black/20 border-b border-white/5">
@@ -89,7 +91,7 @@ export function DealingPhase({
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-center p-2 sm:p-4 gap-3 sm:gap-4 min-h-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center p-2 sm:p-4 pt-4 sm:pt-6 gap-3 sm:gap-4 min-h-0 overflow-y-auto">
         <div className="w-full flex-shrink-0 flex justify-center">
           <DealingTable
             gameState={gameState}

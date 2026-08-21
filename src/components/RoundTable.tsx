@@ -32,15 +32,23 @@ export function RoundTable({
   const total = gameState.players.length;
   const inDealing = gameState.phase === 'dealing';
   const avatarSize = dense ? 'sm' : compact ? 'md' : 'lg';
+  const seatVerticalCenter = compact ? 50 : 54;
 
   return (
     <div
-      className={`relative mx-auto ${
+      className={
         compact
-          ? 'w-full max-w-[340px] aspect-[5/3] flex-shrink-0'
-          : 'w-full max-w-3xl aspect-[4/3] min-h-[200px] max-h-[min(50vh,420px)]'
-      }`}
+          ? 'relative mx-auto w-full max-w-[340px] aspect-[5/3] flex-shrink-0'
+          : 'relative mx-auto w-full max-w-3xl flex-shrink-0 pt-8 sm:pt-10 lg:pt-12 pb-2'
+      }
     >
+      <div
+        className={
+          compact
+            ? 'relative w-full aspect-[5/3]'
+            : 'relative w-full aspect-[4/3] min-h-[200px] max-h-[min(45vh,400px)]'
+        }
+      >
       {flyingCard && (
         <CardBack
           key={flyingCard.key}
@@ -71,7 +79,13 @@ export function RoundTable({
       </div>
 
       {gameState.players.map((player) => {
-        const pos = getSeatPosition(player.seatIndex, mySeat, total, seatSpread);
+        const pos = getSeatPosition(
+          player.seatIndex,
+          mySeat,
+          total,
+          seatSpread,
+          seatVerticalCenter
+        );
         const isActive = player.id === gameState.currentTurnPlayerId;
         const isMe = player.id === gameState.myId;
         const isAway = !player.isConnected && gameState.phase !== 'waiting';
@@ -116,9 +130,7 @@ export function RoundTable({
               profilePicture={player.profilePicture}
               size={avatarSize}
               isHost={player.id === gameState.hostId}
-              isActive={
-                (isActive && gameState.phase === 'playing') || isReceiving
-              }
+              isActive={isReceiving}
               isMe={isMe}
               isReady={player.isReady}
               showReadyRing={gameState.phase === 'waiting'}
@@ -195,6 +207,7 @@ export function RoundTable({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

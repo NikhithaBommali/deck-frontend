@@ -6,7 +6,6 @@ import {
   loadGameSession,
   saveGameSession,
 } from '../api/session';
-import { getInviteCodeFromUrl } from '../utils/roomInvite';
 import { RoomPeekResult, JoinRoomResult } from '../types/room';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
@@ -61,14 +60,13 @@ export function useSocket(callbacks: SocketCallbacks = {}) {
       setPlayerId(result.playerId!);
       setReconnecting(false);
     } else {
+      // Stale local session (room ended, server restarted, etc.) — return to lobby quietly.
       clearGameSession();
       setReconnecting(false);
       setGameState(null);
       setRoomCode(null);
       setPlayerId(null);
-      if (!getInviteCodeFromUrl()) {
-        setError(result.error || 'Could not restore your session');
-      }
+      setError(null);
     }
   }, [emit]);
 
@@ -148,7 +146,7 @@ export function useSocket(callbacks: SocketCallbacks = {}) {
     return result;
   };
 
-  const leaveRoom = async () => {
+  const leaveRoom = useCallback(async () => {
     await emit('leaveRoom');
     clearGameSession();
     setGameState(null);
@@ -156,7 +154,7 @@ export function useSocket(callbacks: SocketCallbacks = {}) {
     setPlayerId(null);
     setError(null);
     setReconnecting(false);
-  };
+  }, [emit]);
 
   const setReady = (ready: boolean) => emit('setReady', { ready });
   const startGame = () => emit('startGame');

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSocket } from './hooks/useSocket';
 import { Lobby } from './components/Lobby';
 import { WaitingRoom } from './components/WaitingRoom';
@@ -27,6 +27,11 @@ function App() {
   const inviteCode = useMemo(() => getInviteCodeFromUrl(), []);
 
   const handleLeave = async () => {
+    if (socket.gameState?.phase === 'finished') {
+      await socket.leaveRoom();
+      return;
+    }
+
     const confirmed = window.confirm(
       'Leave this game? You will forfeit your seat and others can continue without you.'
     );
@@ -34,6 +39,16 @@ function App() {
       await socket.leaveRoom();
     }
   };
+
+  useEffect(() => {
+    if (socket.gameState?.phase !== 'finished') return;
+
+    const timer = window.setTimeout(() => {
+      void socket.leaveRoom();
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [socket.gameState?.phase, socket.leaveRoom]);
 
   if (socket.reconnecting && !socket.gameState) {
     return <ReconnectingScreen />;

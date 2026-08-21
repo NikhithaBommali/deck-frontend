@@ -52,7 +52,7 @@ export function WaitingRoom({
             <RoomInviteShare roomCode={roomCode} variant="sidebar" />
           </div>
 
-          <div className="flex-1 min-h-[180px] flex items-center justify-center px-3 py-2">
+          <div className="flex-1 min-h-[180px] flex items-center justify-center px-3 py-2 pt-4 sm:pt-6 lg:pt-8">
             <RoundTable
               gameState={gameState}
               showCardCounts={false}

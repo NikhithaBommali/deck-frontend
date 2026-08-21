@@ -39,7 +39,7 @@ export function PlayerAvatar({
         className={`
           relative rounded-full overflow-hidden border-2 shadow-lg transition-all duration-300
           ${sizeClasses[size]}
-          ${isActive ? `${activeRingClasses[size]} animate-pulse` : ''}
+          ${isActive ? `${activeRingClasses[size]}` : ''}
           ${!isActive && isMe ? 'border-gold-400 ring-2 ring-gold-400/40' : ''}
           ${!isActive && !isMe ? 'border-white/30' : ''}
           ${showReadyRing && isReady ? 'ring-2 ring-green-500/60' : ''}
@@ -61,12 +61,6 @@ export function PlayerAvatar({
       {isHost && (
         <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-gold-500 text-felt-900 text-[9px] font-bold rounded-full z-10">
           HOST
-        </span>
-      )}
-
-      {isActive && (
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-green-500 text-white text-[9px] font-bold rounded-full whitespace-nowrap z-10">
-          TURN
         </span>
       )}
     </div>

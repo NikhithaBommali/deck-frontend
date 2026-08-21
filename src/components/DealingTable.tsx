@@ -210,7 +210,7 @@ export function DealingTable({
         (p) => p.id === gameState.lastDealtPlayerId
       );
       if (player) {
-        const pos = getSeatPosition(player.seatIndex, mySeat, total, 'wide');
+        const pos = getSeatPosition(player.seatIndex, mySeat, total, 'wide', 54);
         setFlyingCard({
           x: pos.x,
           y: pos.y,

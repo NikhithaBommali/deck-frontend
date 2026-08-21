@@ -12,7 +12,6 @@ export function ScoreBar({ gameState, showScores = true }: ScoreBarProps) {
     return null;
   }
 
-  const isActive = player.id === gameState.currentTurnPlayerId;
   const handScore =
     gameState.phase === 'playing' ? player.handScore : player.score;
 
@@ -22,8 +21,7 @@ export function ScoreBar({ gameState, showScores = true }: ScoreBarProps) {
         <div
           className={`
             flex items-center gap-2 px-3 py-2 rounded-xl border min-w-[140px] transition-all
-            ${player.isEliminated ? 'opacity-40 border-red-500/20' : ''}
-            ${isActive && !player.isEliminated ? 'bg-green-500/20 border-green-400/50 shadow-lg shadow-green-500/10' : 'bg-black/30 border-gold-500/30'}
+            ${player.isEliminated ? 'opacity-40 border-red-500/20 bg-black/30' : 'bg-black/30 border-gold-500/30'}
           `}
         >
           <PlayerAvatar
@@ -31,7 +29,6 @@ export function ScoreBar({ gameState, showScores = true }: ScoreBarProps) {
             profilePicture={player.profilePicture}
             size="sm"
             isHost={player.id === gameState.hostId}
-            isActive={isActive && !player.isEliminated}
             isMe
           />
           <div className="flex-1 min-w-0">
