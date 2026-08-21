@@ -40,7 +40,6 @@ export function GameBoard({
   const currentPlayer = gameState.players.find(
     (p) => p.id === gameState.currentTurnPlayerId
   );
-  const myName = gameState.players.find((p) => p.id === gameState.myId)?.name;
   const rankGroups = groupHandByRank(gameState.myHand);
   const me = gameState.players.find((p) => p.id === gameState.myId);
   const eliminatedThisRound = gameState.players.filter(
@@ -286,53 +285,16 @@ export function GameBoard({
                 Round {gameState.roundNumber} ·{' '}
                 <span className="font-mono text-gold-400">{roomCode}</span>
               </span>
-              <span className="text-white/40 text-xs hidden xs:inline">
+              <span className="text-white/40 text-xs">
                 Total:{' '}
                 <span className="text-gold-400 font-bold">{gameState.myTotalScore}</span>
               </span>
-            </div>
-            <div
-              className={`flex-shrink-0 px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap ${
-                gameState.isMyTurn
-                  ? 'bg-green-500/30 text-green-300 border border-green-500/40 animate-pulse'
-                  : 'bg-white/10 text-white/60'
-              }`}
-            >
-              {gameState.isMyTurn
-                ? 'Your Turn'
-                : `${currentPlayer?.name ?? 'Opponent'}'s Turn`}
             </div>
           </div>
           <div className="hidden sm:block mt-2">
             <ScoreBar gameState={gameState} />
           </div>
         </header>
-
-        {/* Turn hints on desktop only — mobile uses header pill + TURN badge on table seats */}
-        <div
-          className={`hidden sm:block px-4 py-2 text-center text-sm font-medium border-b flex-shrink-0 ${
-            gameState.isMyTurn
-              ? 'bg-green-600/30 border-green-500/40 text-green-100'
-              : 'bg-amber-600/20 border-amber-500/30 text-amber-100'
-          }`}
-        >
-          <div className="flex items-center justify-center gap-2 max-w-6xl mx-auto">
-            {gameState.isMyTurn ? (
-              <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-            ) : (
-              <span className="text-lg flex-shrink-0">⏳</span>
-            )}
-            <span>
-              {gameState.isMyTurn ? (
-                <strong>YOUR TURN{myName ? ` (${myName})` : ''}</strong>
-              ) : (
-                <strong>{currentPlayer?.name ?? 'Opponent'}&apos;s turn</strong>
-              )}
-              {' — '}
-              {turnMessage}
-            </span>
-          </div>
-        </div>
 
         <div className="flex-1 p-2 sm:p-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 flex flex-col">
           <div className="flex-shrink-0 flex justify-center w-full">
@@ -379,8 +341,8 @@ export function GameBoard({
                 </div>
               </div>
 
-              {isCompact && gameState.isMyTurn && (
-                <p className="text-green-300/90 text-[11px] leading-snug border-t border-white/10 pt-2">
+              {gameState.isMyTurn && (
+                <p className="text-green-300/90 text-[11px] sm:text-xs leading-snug border-t border-white/10 pt-2">
                   {turnMessage}
                 </p>
               )}
