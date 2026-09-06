@@ -6,6 +6,7 @@ import {
   MAX_SCORE,
   Rank,
   SHOW_THRESHOLD,
+  TURN_DURATION_SEC,
   calculateScore,
 } from '../types/game';
 
@@ -130,6 +131,7 @@ export interface DemoRuntime {
   roundScores: Record<string, number[]>;
   hasShown: Record<string, boolean>;
   hint: string;
+  turnStartedAt: number | null;
 }
 
 export function createInitialDemoRuntime(playerName: string): DemoRuntime {
@@ -168,6 +170,7 @@ export function createInitialDemoRuntime(playerName: string): DemoRuntime {
       [DEMO_IDS.sam]: false,
     },
     hint: 'Welcome! Tap Ready Up so everyone knows you are set to play.',
+    turnStartedAt: null,
   };
 }
 
@@ -255,11 +258,25 @@ function buildPlayers(runtime: DemoRuntime): ClientPlayer[] {
   });
 }
 
+export function getDemoRoundStarterId(
+  roundNumber: number,
+  phase: DemoRuntime['phase']
+): string | null {
+  const order = [DEMO_IDS.player, DEMO_IDS.alex, DEMO_IDS.sam];
+  if (phase === 'dealing') {
+    return order[(roundNumber - 1) % order.length] ?? null;
+  }
+  if (phase === 'round-end') {
+    return order[roundNumber % order.length] ?? null;
+  }
+  return null;
+}
+
 function canShowForStep(runtime: DemoRuntime, handScore: number): boolean {
   if (runtime.phase !== 'playing' || !runtime.isMyTurn || runtime.turnHasPlaced) {
     return false;
   }
-  if (handScore >= SHOW_THRESHOLD) return false;
+  if (handScore > SHOW_THRESHOLD) return false;
   return (
     runtime.playingStep === 'show_round' || runtime.playingStep === 'show_round2'
   );
@@ -326,6 +343,7 @@ export function toDemoClientState(runtime: DemoRuntime): ClientGameState {
     showPlayerId: runtime.showPlayerId,
     showPenalty: runtime.showPenalty,
     hostId: DEMO_IDS.player,
+    roundStarterId: getDemoRoundStarterId(runtime.roundNumber, runtime.phase),
     cardsRevealed: runtime.cardsRevealed,
     dealingStep: runtime.dealingStep,
     dealingTotalSteps,
@@ -333,6 +351,11 @@ export function toDemoClientState(runtime: DemoRuntime): ClientGameState {
     lastDealtPlayerId: runtime.lastDealtPlayerId,
     deckRemaining: 24,
     activePlayerCount: PLAYER_COUNT,
+    turnDeadlineAt:
+      runtime.phase === 'playing' && runtime.turnStartedAt
+        ? runtime.turnStartedAt + TURN_DURATION_SEC * 1000
+        : null,
+    turnDurationSec: TURN_DURATION_SEC,
   };
 }
 

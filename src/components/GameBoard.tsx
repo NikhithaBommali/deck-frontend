@@ -4,6 +4,7 @@ import { DiscardPile } from './DiscardPile';
 import { GameLayout } from './GameLayout';
 import { RoundTable } from './RoundTable';
 import { ScoreBar } from './ScoreBar';
+import { GameBrandHeader } from './GameBrandHeader';
 import {
   ClientGameState,
   cardMatchesDiscardTop,
@@ -36,7 +37,10 @@ export function GameBoard({
   onLeave,
 }: GameBoardProps) {
   const myScore = gameState.myHandScore;
-  const isHost = gameState.hostId === gameState.myId;
+  const isRoundStarter = gameState.roundStarterId === gameState.myId;
+  const roundStarter = gameState.players.find(
+    (p) => p.id === gameState.roundStarterId
+  );
   const winner = gameState.players.find((p) => p.id === gameState.winnerId);
   const showPlayer = gameState.players.find((p) => p.id === gameState.showPlayerId);
   const rankGroups = groupHandByRank(gameState.myHand);
@@ -61,7 +65,7 @@ export function GameBoard({
   const isCompact = useMediaQuery('(max-width: 640px)');
 
   const tableControls = (
-    <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+    <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 flex-wrap max-w-full">
       <button
         onClick={onDrawDeck}
         disabled={!gameState.mustDrawAfterPlace}
@@ -242,7 +246,7 @@ export function GameBoard({
 
               {gameState.activePlayerCount < 2 ? (
                 <p className="text-gold-300 text-sm">Not enough players to continue.</p>
-              ) : isHost ? (
+              ) : isRoundStarter ? (
                 <button
                   onClick={onContinue}
                   className="w-full py-3 bg-gold-500 hover:bg-gold-400 text-felt-900 font-bold rounded-xl transition-colors text-lg"
@@ -251,7 +255,8 @@ export function GameBoard({
                 </button>
               ) : (
                 <p className="text-white/40 text-sm">
-                  Waiting for host to continue the game...
+                  Waiting for {roundStarter?.name ?? 'the next player'} to continue
+                  the game...
                 </p>
               )}
             </div>
@@ -268,18 +273,21 @@ export function GameBoard({
       demoHint={demoHint}
       onLeave={onLeave}
     >
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0">
         <header className="px-2 sm:px-4 py-1.5 sm:py-2 bg-black/30 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap min-w-0 flex-1">
-              <span className="font-display text-base sm:text-xl text-gold-400 font-bold">
-                Deck Score
-              </span>
-              <span className="text-white/40 text-xs sm:text-sm truncate">
-                Round {gameState.roundNumber} ·{' '}
-                <span className="font-mono text-gold-400">{roomCode}</span>
-              </span>
-              <span className="text-white/40 text-xs">
+              <GameBrandHeader
+                size="sm"
+                subtitle={
+                  <>
+                    Round {gameState.roundNumber} ·{' '}
+                    <span className="font-mono text-gold-400">{roomCode}</span>
+                  </>
+                }
+              />
+              <span className="text-white/40 text-xs hidden sm:inline">·</span>
+              <span className="text-white/40 text-xs sm:text-sm whitespace-nowrap">
                 Total:{' '}
                 <span className="text-gold-400 font-bold">{gameState.myTotalScore}</span>
               </span>
@@ -290,7 +298,7 @@ export function GameBoard({
           </div>
         </header>
 
-        <div className="flex-1 p-2 sm:p-4 pt-2 sm:pt-4 max-w-6xl mx-auto w-full space-y-2 sm:space-y-4 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y p-2 sm:p-4 pt-2 sm:pt-3 max-w-6xl mx-auto w-full space-y-2 sm:space-y-3 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-4">
           <div className="flex-shrink-0 flex justify-center w-full">
             <RoundTable
               gameState={gameState}
@@ -302,7 +310,7 @@ export function GameBoard({
           </div>
 
           {isCompact && (
-            <div className="flex-shrink-0 w-full rounded-xl bg-black/30 border border-white/10 p-3">
+            <div className="flex-shrink-0 w-full rounded-xl bg-black/30 border border-white/10 p-2.5 sm:p-3">
               {tableControls}
             </div>
           )}
@@ -408,7 +416,7 @@ export function GameBoard({
                       </span>
                     ) : (
                       <span className="text-white/40 text-xs">
-                        Show when score &lt; {gameState.showThreshold}
+                        Show when score ≤ {gameState.showThreshold}
                       </span>
                     )}
                   </>

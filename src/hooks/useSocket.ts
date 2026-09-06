@@ -6,6 +6,7 @@ import {
   loadGameSession,
   saveGameSession,
 } from '../api/session';
+import { attachVoiceSocketListeners } from './socialSocketBridge';
 import { RoomPeekResult, JoinRoomResult } from '../types/room';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
@@ -17,6 +18,7 @@ interface SocketCallbacks {
 export function useSocket(callbacks: SocketCallbacks = {}) {
   const socketRef = useRef<Socket | null>(null);
   const callbacksRef = useRef(callbacks);
+  const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [reconnecting, setReconnecting] = useState(!!loadGameSession());
   const [gameState, setGameState] = useState<ClientGameState | null>(null);
@@ -78,6 +80,8 @@ export function useSocket(callbacks: SocketCallbacks = {}) {
       reconnectionDelay: 1000,
     });
     socketRef.current = socket;
+    setSocketInstance(socket);
+    attachVoiceSocketListeners(socket);
 
     socket.on('connect', () => {
       setConnected(true);
@@ -96,7 +100,9 @@ export function useSocket(callbacks: SocketCallbacks = {}) {
     });
 
     return () => {
+      attachVoiceSocketListeners(null);
       socket.disconnect();
+      setSocketInstance(null);
     };
   }, [tryReconnect]);
 
@@ -175,6 +181,7 @@ export function useSocket(callbacks: SocketCallbacks = {}) {
     roomCode,
     playerId,
     error,
+    socket: socketInstance,
     peekRoom,
     createRoom,
     joinRoom,

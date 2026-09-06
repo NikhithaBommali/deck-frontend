@@ -30,6 +30,7 @@ body {
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
@@ -105,4 +106,159 @@ body {
 
 .playing-card {
   aspect-ratio: 5 / 7;
+}
+
+.felt-texture {
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 55%),
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg 30deg,
+      rgba(255, 255, 255, 0.015) 30deg 60deg
+    );
+}
+
+.felt-texture-lobby {
+  background-color: #071f14;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% 100%, rgba(26, 122, 82, 0.12) 0%, transparent 55%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.012) 2px,
+      rgba(255, 255, 255, 0.012) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.008) 2px,
+      rgba(255, 255, 255, 0.008) 3px
+    );
+}
+
+.felt-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
+.felt-vignette-lobby {
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 45%, transparent 30%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 18%, transparent 82%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.lobby-table-surface {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 52%, rgba(17, 102, 68, 0.22) 0%, transparent 70%);
+}
+
+.card-panel {
+  position: relative;
+  background: linear-gradient(
+    165deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(230, 180, 34, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.card-panel::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  border: 1px solid rgba(230, 180, 34, 0.08);
+  pointer-events: none;
+}
+
+.btn-primary {
+  @apply w-full py-3.5 px-5 disabled:opacity-50 font-bold rounded-xl transition-all;
+  color: #062818;
+  border: 1px solid rgba(201, 151, 26, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-image: linear-gradient(to bottom, #f5d061, #c9971a);
+}
+
+.btn-primary:not(:disabled):hover {
+  background-image: linear-gradient(to bottom, #f9e08a, #e6b422);
+}
+
+.btn-primary:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  @apply w-full py-3.5 px-5 bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white font-semibold rounded-xl border border-white/20 transition-all backdrop-blur-sm;
+}
+
+.btn-secondary:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.feature-pill {
+  @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-black/30 border border-white/10 text-white/70;
+}
+
+.connection-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.connection-dot--online {
+  @apply bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)];
+}
+
+.connection-dot--offline {
+  @apply bg-amber-400 animate-pulse;
+}
+
+@keyframes reaction-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px) scale(1);
+  }
+}
+
+.reaction-pop {
+  animation: reaction-pop 2.5s ease-out forwards;
+}
+
+@keyframes floating-reaction {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.4);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.2);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-120px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-220px) scale(0.85);
+  }
+}
+
+.floating-reaction {
+  animation: floating-reaction 2.2s ease-out forwards;
 }

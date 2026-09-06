@@ -5,6 +5,12 @@ import { CollapsibleScorePanel } from './CollapsibleScorePanel';
 import { DemoHintBar } from './DemoHintBar';
 import { ScoreTable } from './ScoreTable';
 import { RoomInviteShare } from './RoomInviteShare';
+import { SocialDock } from './social/SocialDock';
+import { VoiceAudioBridge } from './social/VoiceAudioBridge';
+import { PlayerActionMenu } from './social/PlayerActionMenu';
+import { FloatingReactionLayer } from './social/FloatingReactionLayer';
+import { useOptionalRoomSocial } from '../context/RoomSocialContext';
+import { GameAudioControls } from './GameAudioControls';
 
 interface GameLayoutProps {
   gameState: ClientGameState;
@@ -23,6 +29,7 @@ export function GameLayout({
   demoHint,
   onLeave,
 }: GameLayoutProps) {
+  const social = useOptionalRoomSocial();
   const host = gameState.players.find((p) => p.id === gameState.hostId);
   const showInvite = gameState.phase === 'waiting' && !!roomCode;
   const { width: sidebarWidth, isResizing, startResize } = useSidebarWidth();
@@ -32,9 +39,10 @@ export function GameLayout({
     gameState.phase !== 'waiting' && gameState.phase !== 'dealing';
 
   return (
-    <div className="h-dvh min-h-0 overflow-hidden bg-gradient-to-br from-felt-900 via-felt-800 to-felt-900 flex flex-col">
+    <div className="h-dvh min-h-0 overflow-hidden bg-gradient-to-br from-felt-900 via-felt-800 to-felt-950 flex flex-col relative">
+      <div className="absolute inset-0 felt-texture opacity-40 pointer-events-none" aria-hidden />
       {onLeave && (
-        <div className="flex-shrink-0 flex items-center justify-between gap-2 px-3 sm:px-4 py-2 bg-black/40 border-b border-white/10">
+        <div className="relative z-10 flex-shrink-0 flex items-center justify-between gap-2 px-3 sm:px-4 py-2 bg-black/40 border-b border-white/10 backdrop-blur-sm">
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap text-white/50 text-xs min-w-0 flex-1">
             {showInvite && roomCode && (
               <div className="flex items-center gap-2">
@@ -42,6 +50,7 @@ export function GameLayout({
                 <RoomInviteShare roomCode={roomCode} variant="inline" />
               </div>
             )}
+            <GameAudioControls compact />
           </div>
           <button
             type="button"
@@ -55,7 +64,7 @@ export function GameLayout({
 
       {demoHint && <DemoHintBar hint={demoHint} />}
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="relative z-10 flex flex-1 min-h-0 overflow-hidden">
         <aside
           className="hidden lg:flex flex-shrink-0 border-r border-white/10 p-3 flex-col gap-3 min-h-0 overflow-hidden relative"
           style={{ width: sidebarWidth }}
@@ -90,11 +99,20 @@ export function GameLayout({
               />
             </div>
           )}
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col lg:overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             {children}
           </div>
         </div>
       </div>
+
+      {social?.enabled && (
+        <>
+          <FloatingReactionLayer />
+          <VoiceAudioBridge />
+          <PlayerActionMenu />
+          <SocialDock />
+        </>
+      )}
     </div>
   );
 }

@@ -69,6 +69,7 @@ export interface ClientGameState {
   showPlayerId: string | null;
   showPenalty: boolean;
   hostId: string;
+  roundStarterId: string | null;
   cardsRevealed: boolean;
   dealingStep: number;
   dealingTotalSteps: number;
@@ -76,11 +77,15 @@ export interface ClientGameState {
   lastDealtPlayerId: string | null;
   deckRemaining: number;
   activePlayerCount: number;
+  turnDeadlineAt: number | null;
+  turnDurationSec: number;
 }
 
 export const MAX_SCORE = 51;
 export const ELIMINATION_SCORE = 51;
 export const SHOW_THRESHOLD = 4;
+export const TURN_DURATION_SEC = 45;
+export const TURN_WARNING_SEC = 10;
 
 /** Reference target for the score bar — actual hand scores may exceed this. */
 export function getScoreBarPercent(score: number, maxScore: number): number {
@@ -93,7 +98,7 @@ export function getScoreColorClass(
   showThreshold: number
 ): string {
   if (score === 0) return 'text-green-400';
-  if (score < showThreshold) return 'text-yellow-400';
+  if (score <= showThreshold) return 'text-yellow-400';
   if (score > maxScore) return 'text-red-400';
   if (score <= maxScore / 2) return 'text-yellow-400';
   return 'text-red-400';

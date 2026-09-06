@@ -3,6 +3,8 @@ import {
   ELIMINATION_SCORE,
   SHOW_THRESHOLD,
 } from '../types/game';
+import { GAME_NAME } from '../constants/brand';
+import { BrandLogo } from './BrandLogo';
 
 interface GameRulesModalProps {
   open: boolean;
@@ -47,16 +49,19 @@ export function GameRulesModal({ open, onClose, onStartDemo }: GameRulesModalPro
         className="relative w-full sm:max-w-lg max-h-[min(92dvh,720px)] bg-gradient-to-b from-felt-800 to-felt-900 border border-white/15 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
       >
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-white/10 flex-shrink-0">
-          <div>
-            <h2
-              id="game-rules-title"
-              className="font-display text-xl sm:text-2xl text-gold-400 font-bold"
-            >
-              How to Play Deck Score
-            </h2>
-            <p className="text-white/50 text-xs mt-0.5">
-              Quick rules for new players
-            </p>
+          <div className="flex items-center gap-3 min-w-0">
+            <BrandLogo size="sm" />
+            <div>
+              <h2
+                id="game-rules-title"
+                className="font-display text-xl sm:text-2xl text-gold-400 font-bold"
+              >
+                How to Play {GAME_NAME}
+              </h2>
+              <p className="text-white/50 text-xs mt-0.5">
+                Quick rules for new players
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -82,7 +87,11 @@ export function GameRulesModal({ open, onClose, onStartDemo }: GameRulesModalPro
           <section>
             <h3 className="text-gold-400 font-semibold mb-1.5">Setup</h3>
             <ul className="list-disc pl-5 space-y-1 text-white/75">
-              <li>2–6 players join a room. Everyone taps Ready, then the host starts.</li>
+              <li>2–6 players join a room. Everyone taps Ready, then the host starts Round 1.</li>
+              <li>
+                The host deals Round 1. Each later round is started by the next player in
+                join order (to the host&apos;s right), rotating around the table.
+              </li>
               <li>Each player gets <strong className="text-white">7 cards</strong>.</li>
               <li>
                 One card is flipped open — every card with the{' '}
@@ -126,7 +135,8 @@ export function GameRulesModal({ open, onClose, onStartDemo }: GameRulesModalPro
           <section>
             <h3 className="text-gold-400 font-semibold mb-1.5">Show (end the round)</h3>
             <p className="text-white/75 mb-2">
-              When your hand score is <strong className="text-white">below {SHOW_THRESHOLD}</strong>, you
+              When your hand score is{' '}
+              <strong className="text-white">{SHOW_THRESHOLD} or less</strong>, you
               can tap <strong className="text-gold-300">Show</strong>.
             </p>
             <ul className="list-disc pl-5 space-y-1 text-white/75">
@@ -162,7 +172,7 @@ export function GameRulesModal({ open, onClose, onStartDemo }: GameRulesModalPro
               <li>Watch the score table to see who is close to {ELIMINATION_SCORE}.</li>
               <li>
                 Only Show when you&apos;re sure no one has a lower hand score (yours must
-                be below {SHOW_THRESHOLD}).
+                be {SHOW_THRESHOLD} or less).
               </li>
             </ul>
           </section>

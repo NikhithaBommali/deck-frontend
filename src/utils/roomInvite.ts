@@ -1,3 +1,5 @@
+import { GAME_NAME } from '../constants/brand';
+
 const ROOM_CODE_PATTERN = /^[A-Z0-9]{6}$/;
 
 export function normalizeRoomCode(code: string): string {
@@ -28,10 +30,10 @@ export function buildRoomInviteMessage(
   const code = normalizeRoomCode(roomCode);
   const url = buildRoomInviteUrl(code);
   const hostLine = hostName?.trim()
-    ? `${hostName.trim()} invited you to play Deck Score!`
-    : 'Join my Deck Score game!';
+    ? `${hostName.trim()} invited you to play ${GAME_NAME}!`
+    : `Join my ${GAME_NAME} game!`;
 
-  return `🃏 ${hostLine}
+  return `${GAME_NAME} — ${hostLine}
 
 Room Code: ${code}
 
@@ -111,7 +113,7 @@ export async function shareRoomInvite(
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'Join Deck Score',
+        title: `Join ${GAME_NAME}`,
         text: message,
         url,
       });

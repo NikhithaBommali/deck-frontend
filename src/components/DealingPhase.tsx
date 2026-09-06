@@ -22,7 +22,7 @@ export function DealingPhase({
   onDistributeCards,
   onLeave,
 }: DealingPhaseProps) {
-  const isHost = gameState.hostId === gameState.myId;
+  const isRoundStarter = gameState.roundStarterId === gameState.myId;
   const dealingStarted = gameState.dealingStep > 0;
   const dealingInProgress =
     dealingStarted && !gameState.isDealingComplete;
@@ -98,11 +98,11 @@ export function DealingPhase({
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-center p-2 sm:p-4 pt-4 sm:pt-6 gap-3 sm:gap-4 min-h-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center p-2 sm:p-4 pt-3 sm:pt-6 gap-3 sm:gap-4 min-h-0 overflow-y-auto overscroll-y-contain touch-pan-y pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-4">
         <div className="w-full flex-shrink-0 flex justify-center">
           <DealingTable
             gameState={gameState}
-            isHost={isHost}
+            isRoundStarter={isRoundStarter}
             compact={isCompact}
             onStartDealing={onStartDealing}
             onDistributeCards={onDistributeCards}

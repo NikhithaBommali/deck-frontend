@@ -2,12 +2,14 @@ interface ProfileUploadProps {
   picture: string;
   onPictureChange: (dataUrl: string) => void;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export function ProfileUpload({
   picture,
   onPictureChange,
   disabled = false,
+  compact = false,
 }: ProfileUploadProps) {
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -22,19 +24,25 @@ export function ProfileUpload({
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div
+      className={`flex items-center ${compact ? 'flex-row gap-3 justify-center' : 'flex-col gap-2'}`}
+    >
       <label
-        className={`relative cursor-pointer group ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
+        className={`relative cursor-pointer group flex-shrink-0 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
       >
-        <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gold-500/40 bg-black/30 flex items-center justify-center">
+        <div
+          className={`rounded-full overflow-hidden border-2 border-gold-500/40 bg-black/30 flex items-center justify-center ${
+            compact ? 'w-14 h-14' : 'w-20 h-20'
+          }`}
+        >
           {picture ? (
             <img src={picture} alt="Profile" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-3xl text-white/30">📷</span>
+            <span className={`text-white/30 ${compact ? 'text-xl' : 'text-3xl'}`}>📷</span>
           )}
         </div>
         <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-          <span className="text-white text-xs font-medium">Upload</span>
+          <span className="text-white text-[10px] font-medium">Upload</span>
         </div>
         <input
           type="file"
@@ -44,7 +52,12 @@ export function ProfileUpload({
           disabled={disabled}
         />
       </label>
-      <span className="text-white/40 text-xs">Profile picture (optional)</span>
+      {!compact && (
+        <span className="text-white/40 text-xs">Profile picture (optional)</span>
+      )}
+      {compact && (
+        <span className="text-white/40 text-[11px]">Photo (optional)</span>
+      )}
     </div>
   );
 }

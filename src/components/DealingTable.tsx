@@ -9,7 +9,7 @@ import { getSeatPosition } from '../utils/tableLayout';
 
 interface DealingTableProps {
   gameState: ClientGameState;
-  isHost: boolean;
+  isRoundStarter: boolean;
   compact?: boolean;
   onStartDealing: () => void;
   onDistributeCards: () => void;
@@ -17,7 +17,7 @@ interface DealingTableProps {
 
 function DealingActions({
   gameState,
-  isHost,
+  isRoundStarter,
   onStartDealing,
   onDistributeCards,
   compact = false,
@@ -25,12 +25,15 @@ function DealingActions({
   const dealingStarted = gameState.dealingStep > 0;
   const dealingInProgress =
     dealingStarted && !gameState.isDealingComplete;
+  const roundStarterName =
+    gameState.players.find((p) => p.id === gameState.roundStarterId)?.name ??
+    'Round starter';
 
   const btnClass = compact
     ? 'w-full max-w-xs py-2.5 px-4 text-sm font-bold rounded-xl transition-all'
     : 'px-4 sm:px-8 py-2 sm:py-3 text-xs sm:text-base font-bold rounded-xl transition-all';
 
-  if (!dealingStarted && isHost) {
+  if (!dealingStarted && isRoundStarter) {
     return (
       <button
         onClick={onStartDealing}
@@ -41,10 +44,10 @@ function DealingActions({
     );
   }
 
-  if (!dealingStarted && !isHost) {
+  if (!dealingStarted && !isRoundStarter) {
     return (
       <p className="text-gold-400/80 text-xs sm:text-sm px-3 py-2 bg-black/30 rounded-lg border border-white/10 text-center max-w-xs">
-        Waiting for host to distribute...
+        Waiting for {roundStarterName} to distribute...
       </p>
     );
   }
@@ -58,7 +61,7 @@ function DealingActions({
     );
   }
 
-  if (gameState.isDealingComplete && isHost) {
+  if (gameState.isDealingComplete && isRoundStarter) {
     return (
       <button
         onClick={onDistributeCards}
@@ -69,10 +72,10 @@ function DealingActions({
     );
   }
 
-  if (gameState.isDealingComplete && !isHost) {
+  if (gameState.isDealingComplete && !isRoundStarter) {
     return (
       <p className="text-green-400/80 text-xs sm:text-sm px-3 py-2 bg-green-500/10 rounded-lg border border-green-500/20 text-center max-w-xs">
-        All cards dealt — waiting for host...
+        All cards dealt — waiting for {roundStarterName}...
       </p>
     );
   }
@@ -82,7 +85,7 @@ function DealingActions({
 
 function DealingTableMobile({
   gameState,
-  isHost,
+  isRoundStarter,
   onStartDealing,
   onDistributeCards,
 }: DealingTableProps) {
@@ -168,7 +171,7 @@ function DealingTableMobile({
       <div className="flex justify-center pb-1">
         <DealingActions
           gameState={gameState}
-          isHost={isHost}
+          isRoundStarter={isRoundStarter}
           compact
           onStartDealing={onStartDealing}
           onDistributeCards={onDistributeCards}
@@ -180,7 +183,7 @@ function DealingTableMobile({
 
 export function DealingTable({
   gameState,
-  isHost,
+  isRoundStarter,
   compact = false,
   onStartDealing,
   onDistributeCards,
@@ -235,7 +238,7 @@ export function DealingTable({
     return (
       <DealingTableMobile
         gameState={gameState}
-        isHost={isHost}
+        isRoundStarter={isRoundStarter}
         onStartDealing={onStartDealing}
         onDistributeCards={onDistributeCards}
       />
@@ -273,7 +276,7 @@ export function DealingTable({
 
           <DealingActions
             gameState={gameState}
-            isHost={isHost}
+            isRoundStarter={isRoundStarter}
             onStartDealing={onStartDealing}
             onDistributeCards={onDistributeCards}
           />

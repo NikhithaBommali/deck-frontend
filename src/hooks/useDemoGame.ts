@@ -44,6 +44,7 @@ export function useDemoGame() {
   const runtimeRef = useRef<DemoRuntime | null>(null);
   const dealingTimerRef = useRef<number | null>(null);
   const botTimerRef = useRef<number | null>(null);
+  const lastRoundStarterAutoRef = useRef('');
 
   const syncState = useCallback((runtime: DemoRuntime) => {
     runtimeRef.current = runtime;
@@ -80,6 +81,7 @@ export function useDemoGame() {
           ...current,
           playingStep: 'bot_sam',
           isMyTurn: false,
+          turnStartedAt: Date.now(),
           hint: "Sam's turn — players take turns placing cards and drawing.",
         });
 
@@ -92,6 +94,7 @@ export function useDemoGame() {
             ...latest,
             playingStep: isRound2 ? 'place_fives' : 'place_sevens',
             isMyTurn: true,
+            turnStartedAt: Date.now(),
             hint: isRound2
               ? 'Your turn! The open card is 5 — all 5s score 0. Tap the group of 5s to Place them.'
               : 'Your turn! The open card is 7 — all 7s score 0 (purple badge). Tap the group of 7s to Place them.',
@@ -114,6 +117,7 @@ export function useDemoGame() {
         turnHasDrawn: false,
         placedOnDiscard: [],
         discardTop: DEMO_DISCARD_START,
+        turnStartedAt: Date.now(),
         hint:
           runtime.roundNumber >= 2
             ? 'Round 2! Alex is playing first — watch how turns rotate around the table.'
@@ -130,6 +134,7 @@ export function useDemoGame() {
       const stored = loadStoredProfile();
       const name = playerName?.trim() || stored.name.trim() || 'You';
       const runtime = createInitialDemoRuntime(name);
+      lastRoundStarterAutoRef.current = '';
       setIsActive(true);
       syncState(runtime);
     },
@@ -139,6 +144,7 @@ export function useDemoGame() {
   const leaveRoom = useCallback(async () => {
     clearAllTimers();
     runtimeRef.current = null;
+    lastRoundStarterAutoRef.current = '';
     setIsActive(false);
     setGameState(null);
     setDemoHint(null);
@@ -283,6 +289,7 @@ export function useDemoGame() {
           turnHasDrawn: false,
           discardTop: newDiscard,
           playingStep: 'draw_after_sevens',
+          turnStartedAt: Date.now(),
           hint: 'Great! Zero-score cards cleared. Now tap the deck to Draw one card — every turn ends with a draw.',
         });
         return;
@@ -297,6 +304,7 @@ export function useDemoGame() {
           turnHasDrawn: false,
           discardTop: newDiscard,
           playingStep: 'draw_after_joker',
+          turnStartedAt: Date.now(),
           hint: 'Joker placed! Draw one more card from the deck to complete your turn.',
         });
         return;
@@ -311,6 +319,7 @@ export function useDemoGame() {
           turnHasDrawn: false,
           discardTop: newDiscard,
           playingStep: 'draw_round2',
+          turnStartedAt: Date.now(),
           hint: 'Nice! Now draw from the deck, then Show to finish Round 2.',
         });
       }
@@ -331,6 +340,7 @@ export function useDemoGame() {
         turnHasDrawn: false,
         placedOnDiscard: [],
         playingStep: 'place_joker',
+        turnStartedAt: Date.now(),
         hint: 'You drew a 7 — still 0 points! Tap the Joker to Place it (jokers always score 0).',
       });
       return;
@@ -344,6 +354,7 @@ export function useDemoGame() {
         turnHasDrawn: false,
         placedOnDiscard: [],
         playingStep: 'show_round',
+        turnStartedAt: Date.now(),
         hint: 'Your hand score is 3 — the lowest at the table! Tap Show to end the round with 0 points.',
       });
       return;
@@ -357,6 +368,7 @@ export function useDemoGame() {
         turnHasDrawn: false,
         placedOnDiscard: [],
         playingStep: 'show_round2',
+        turnStartedAt: Date.now(),
         hint: 'Hand score is 3 again — lowest at the table. Tap Show to win Round 2!',
       });
     }
@@ -430,7 +442,7 @@ export function useDemoGame() {
       hint:
         runtime.roundNumber >= 2
           ? 'Round 2 complete! Check the score table — lowest total wins the game.'
-          : 'Round 1 complete with 0 points! Tap Continue to deal Round 2.',
+          : 'Round 1 complete with 0 points! Alex will deal Round 2 next.',
     });
   }, [applyRoundEnd, clearBotTimer, syncState]);
 
@@ -465,9 +477,46 @@ export function useDemoGame() {
       winnerId: null,
       showPlayerId: null,
       showPenalty: false,
-      hint: 'Round 2 — open card is now 5. Tap Distribute Cards to deal again.',
+      hint: 'Round 2 — Alex deals this round. Cards will fly out shortly.',
+      turnStartedAt: null,
     });
   }, [syncState]);
+
+  useEffect(() => {
+    if (!isActive || !gameState?.roundStarterId) return;
+    if (gameState.roundStarterId === DEMO_IDS.player) return;
+
+    const autoKey = `${gameState.phase}-${gameState.roundNumber}-${gameState.dealingStep}-${gameState.isDealingComplete}-${gameState.roundStarterId}`;
+    if (lastRoundStarterAutoRef.current === autoKey) return;
+
+    let timer: number | undefined;
+    if (gameState.phase === 'round-end') {
+      lastRoundStarterAutoRef.current = autoKey;
+      timer = window.setTimeout(() => {
+        void nextRound();
+      }, 1600);
+    } else if (gameState.phase === 'dealing' && gameState.dealingStep === 0) {
+      lastRoundStarterAutoRef.current = autoKey;
+      timer = window.setTimeout(() => {
+        void startDealing();
+      }, 1400);
+    } else if (gameState.phase === 'dealing' && gameState.isDealingComplete) {
+      lastRoundStarterAutoRef.current = autoKey;
+      timer = window.setTimeout(() => {
+        void distributeCards();
+      }, 1400);
+    }
+
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [
+    isActive,
+    gameState,
+    nextRound,
+    startDealing,
+    distributeCards,
+  ]);
 
   const updateProfilePicture = useCallback(async () => {}, []);
 
@@ -480,6 +529,7 @@ export function useDemoGame() {
     roomCode: isActive ? DEMO_ROOM_CODE : null,
     playerId: isActive ? DEMO_IDS.player : null,
     error: null,
+    socket: null,
     startDemo,
     peekRoom,
     createRoom,

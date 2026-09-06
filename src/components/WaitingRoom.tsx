@@ -3,6 +3,8 @@ import { GameLayout } from './GameLayout';
 import { RoundTable } from './RoundTable';
 import { RoomInviteShare } from './RoomInviteShare';
 import { ScoreBar } from './ScoreBar';
+import { BrandLogo } from './BrandLogo';
+import { BrandName } from './BrandName';
 
 interface WaitingRoomProps {
   gameState: ClientGameState;
@@ -67,10 +69,9 @@ export function WaitingRoom({
               dense
               seatSpread="wide"
               centerContent={
-                <div className="text-center space-y-0.5 px-2">
-                  <p className="text-gold-400/80 font-display text-sm sm:text-base font-bold">
-                    Deck Score
-                  </p>
+                <div className="text-center space-y-1.5 px-2">
+                  <BrandLogo size="sm" className="mx-auto mb-1" />
+                  <BrandName size="sm" as="p" className="block" />
                   <p className="text-white/40 text-[10px] sm:text-xs">
                     Take a seat at the table
                   </p>
